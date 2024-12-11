@@ -1,6 +1,9 @@
-import { useGetDashboardMetricsQuery } from "@/state/api";
-import { TrendingUp } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import {
+  useGetVisitorSummaryQuery,
+  transformVisitorSummaryToChartData,
+  processVisitorSummaryData,
+} from "@/state/dashboardSlice";
 import {
   Bar,
   BarChart,
@@ -10,122 +13,202 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+} from "date-fns";
+
+// Tipe untuk filter
+type DateRangeFilter = "thisWeek" | "thisMonth" | "custom";
 
 const CardVisitorSummary = () => {
-  const { data, isLoading, isError } = useGetDashboardMetricsQuery();
-  const visitorData = data?.visitorSummary || [];
+  // State untuk filter
+  const [dateRangeFilter, setDateRangeFilter] =
+    useState<DateRangeFilter>("thisMonth");
+  const [customStartDate, setCustomStartDate] = useState<string>(
+    format(startOfMonth(new Date()), "yyyy-MM-dd")
+  );
+  const [customEndDate, setCustomEndDate] = useState<string>(
+    format(endOfMonth(new Date()), "yyyy-MM-dd")
+  );
 
-  const [timeframe, setTimeframe] = useState("weekly");
+  // State untuk trigger query
+  const [queryParams, setQueryParams] = useState<{
+    startDate?: string;
+    endDate?: string;
+  }>({
+    startDate: format(startOfMonth(new Date()), "yyyy-MM-dd"),
+    endDate: format(endOfMonth(new Date()), "yyyy-MM-dd"),
+  });
 
-  if (isError) {
-    return <div className="m-5">Failed to fetch data</div>;
-  }
+  // Hitung rentang tanggal berdasarkan filter
+  const getDateRange = () => {
+    const today = new Date();
+
+    switch (dateRangeFilter) {
+      case "thisWeek":
+        return {
+          startDate: format(startOfWeek(today), "yyyy-MM-dd"),
+          endDate: format(endOfWeek(today), "yyyy-MM-dd"),
+        };
+      case "thisMonth":
+        return {
+          startDate: format(startOfMonth(today), "yyyy-MM-dd"),
+          endDate: format(endOfMonth(today), "yyyy-MM-dd"),
+        };
+      case "custom":
+        return {
+          startDate: customStartDate,
+          endDate: customEndDate,
+        };
+    }
+  };
+
+  // Effect untuk memperbarui query params saat filter berubah
+  useEffect(() => {
+    const newParams =
+      dateRangeFilter !== "custom"
+        ? getDateRange()
+        : { startDate: customStartDate, endDate: customEndDate };
+
+    // Validasi rentang tanggal
+    if (newParams?.startDate && newParams?.endDate) {
+      setQueryParams(newParams);
+    }
+  }, [dateRangeFilter, customStartDate, customEndDate]);
+
+  // Query dengan rentang tanggal dinamis
+  const { data, isLoading, isError } = useGetVisitorSummaryQuery(queryParams, {
+    // Tambahkan skip untuk mencegah query awal yang tidak perlu
+    skip: !queryParams.startDate || !queryParams.endDate,
+  });
+
+  // Transform data untuk chart
+  const chartData = data ? transformVisitorSummaryToChartData(data) : [];
+
+  // Proses data
+  const processedData = data ? processVisitorSummaryData(chartData) : null;
+
+  // Handler untuk validasi dan update tanggal custom
+  const handleCustomDateChange = (type: "start" | "end", value: string) => {
+    if (type === "start") {
+      setCustomStartDate(value);
+
+      // Pastikan tanggal awal tidak lebih besar dari tanggal akhir
+      if (new Date(value) > new Date(customEndDate)) {
+        setCustomEndDate(value);
+      }
+    } else {
+      setCustomEndDate(value);
+
+      // Pastikan tanggal akhir tidak lebih kecil dari tanggal awal
+      if (new Date(value) < new Date(customStartDate)) {
+        setCustomStartDate(value);
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col justify-between row-span-2 xl:row-span-3 col-span-1 md:col-span-2 xl:col-span-1 bg-white shadow-md rounded-2xl">
+      {/* Filter Dropdown */}
+      <div className="px-7 pt-5 flex justify-between items-center">
+        <h2 className="text-lg font-semibold">Total Kunjungan</h2>
+        <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2">
+          {/* Dropdown Filter */}
+          <select
+            value={dateRangeFilter}
+            onChange={(e) =>
+              setDateRangeFilter(e.target.value as DateRangeFilter)
+            }
+            className="px-2 py-1 border rounded"
+          >
+            <option value="thisWeek">Minggu Ini</option>
+            <option value="thisMonth">Bulan Ini</option>
+            <option value="custom">Custom</option>
+          </select>
+
+          {/* Custom Date Range */}
+          {dateRangeFilter === "custom" && (
+            <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
+              <input
+                type="date"
+                value={customStartDate}
+                onChange={(e) =>
+                  handleCustomDateChange("start", e.target.value)
+                }
+                className="px-2 py-1 border rounded"
+                max={customEndDate}
+              />
+              <input
+                type="date"
+                value={customEndDate}
+                onChange={(e) => handleCustomDateChange("end", e.target.value)}
+                className="px-2 py-1 border rounded"
+                min={customStartDate}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
       {isLoading ? (
-        <div className="m-5">Loading...</div>
+        <div className="m-5">Memuat...</div>
+      ) : isError ? (
+        <div className="m-5 text-red-500">Gagal memuat data</div>
       ) : (
         <>
-          {/* HEADER */}
-          <div>
-            <h2 className="text-lg font-semibold mb-2 px-7 pt-5">
-              Total Kunjungan
-            </h2>
-            <hr />
-          </div>
+          <hr className="mt-2" />
 
-          {/* BODY */}
+          {/* Body */}
           <div>
-            {/* BODY HEADER */}
+            {/* Statistik */}
             <div className="flex justify-between items-center mb-6 px-7 mt-5">
               <div className="text-lg font-medium">
-                <p className="text-xs text-gray-400">Value</p>
-                <span className="text-2xl font-extrabold">120</span>
-                <span className="text-green-500 text-sm ml-2">
-                  <TrendingUp className="inline w-4 h-4 mr-1" />
-                  20%
+                <p className="text-xs text-gray-400">Jumlah Kunjungan</p>
+                <span className="text-2xl font-extrabold">
+                  {processedData?.totalVisitors || 0}
                 </span>
               </div>
-              <select
-                className="shadow-sm border border-gray-300 bg-white p-2 rounded"
-                value={timeframe}
-                onChange={(e) => {
-                  setTimeframe(e.target.value);
-                }}
-              >
-                <option value="harian">Harian</option>
-                <option value="mingguan">Mingguan</option>
-                <option value="bulanan">Bulanan</option>
-              </select>
             </div>
-            {/* CHART */}
-            <ResponsiveContainer width="100%" height={350} className="px-7">
+
+            {/* Chart */}
+            <ResponsiveContainer width="100%" height={350}>
               <BarChart
-                data={visitorData}
+                data={chartData}
                 margin={{ top: 0, right: 0, left: -25, bottom: 0 }}
+                className="relative z-10"
               >
-                <defs>
-                  <linearGradient
-                    id="gradientFill"
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="0%"
-                  >
-                    <stop
-                      offset="0%"
-                      style={{ stopColor: "#16927E", stopOpacity: 1 }}
-                    />
-                    <stop
-                      offset="100%"
-                      style={{ stopColor: "#F2D457", stopOpacity: 1 }}
-                    />
-                  </linearGradient>
-                </defs>
                 <CartesianGrid strokeDasharray="" vertical={false} />
                 <XAxis
                   dataKey="date"
-                  tickFormatter={(value) => {
-                    const date = new Date(value);
-                    return `${date.getMonth() + 1}/${date.getDate()}`;
-                  }}
+                  interval="preserveStartEnd"
+                  tickCount={10}
                 />
-                <YAxis
-                  tick={{ fontSize: 12, dx: -1 }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <Tooltip
-                  formatter={(value: number) => [
-                    `${value.toLocaleString("id")}`,
-                  ]}
-                  labelFormatter={(label) => {
-                    const date = new Date(label);
-                    return date.toLocaleDateString("id-ID", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    });
-                  }}
-                />
+                <YAxis />
+                <Tooltip />
                 <Bar
-                  dataKey="totalValue"
-                  fill="url(#gradientFill)"
+                  dataKey="total"
+                  fill="#16927E"
                   barSize={10}
-                  radius={[10, 10, 0, 0]}
+                  radius={[5, 5, 0, 0]}
                 />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          {/* FOOTER */}
+          {/* Footer */}
           <div>
             <hr />
             <div className="flex justify-between items-center mt-6 text-sm px-7 mb-4">
-              <p>{visitorData.length || 0} hari</p>
-              <p className="text-sm">
-                Kunjungan Terbanyak: <span className="font-bold">120</span>
+              <p>Total Hari: {chartData.length || 0}</p>
+              <p>
+                Kunjungan Terbanyak:
+                <span className="font-bold ml-2">
+                  {processedData?.maxVisitorDay?.total || 0}
+                </span>
               </p>
             </div>
           </div>

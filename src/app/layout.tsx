@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import "./globals.css";
+import "react-datepicker/dist/react-datepicker.css";
+import { Toaster } from "react-hot-toast";
 import DashboardWrapper from "./dashboardWrapper";
+import "./globals.css";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,6 +32,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <DashboardWrapper>{children}</DashboardWrapper>
+        <Toaster />
       </body>
     </html>
   );

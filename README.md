@@ -5,5 +5,5 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 Run fake API:
 
 ```bash
-json-server --watch fakeAPI/db.json --port 8080
+json-server --watch fakeAPI/db.json --port 3004
 ```

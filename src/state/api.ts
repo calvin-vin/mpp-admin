@@ -1,11 +1,30 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface Product {
-  productId: string;
+  id: string;
   name: string;
   price: number;
-  rating?: number;
   stockQuantity: number;
+  logo: string;
+}
+
+export interface Agency {
+  id: string;
+  name: string;
+  tenant_number: number;
+  officers_count: number;
+  active: number;
+  logo: string;
+  services_count: number;
+  visitors_count: number;
+  services: Service[];
+}
+
+interface Service {
+  id: number;
+  name: string;
+  open?: number;
+  close?: number;
 }
 
 export interface NewProduct {
@@ -67,18 +86,11 @@ export interface User {
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL }),
   reducerPath: "api",
-  tagTypes: ["DashboardMetrics", "Products", "Users", "Expenses"],
+  tagTypes: ["DashboardMetrics", "Agencies", "Users", "Expenses", "Queues"],
   endpoints: (build) => ({
     getDashboardMetrics: build.query<DashboardMetrics, void>({
       query: () => "/dashboard",
       providesTags: ["DashboardMetrics"],
-    }),
-    getProducts: build.query<Product[], string | void>({
-      query: (search) => ({
-        url: "/products",
-        params: search ? { search } : {},
-      }),
-      providesTags: ["Products"],
     }),
     createProduct: build.mutation<Product, NewProduct>({
       query: (newProduct) => ({
@@ -86,11 +98,7 @@ export const api = createApi({
         method: "POST",
         body: newProduct,
       }),
-      invalidatesTags: ["Products"],
-    }),
-    getUsers: build.query<User[], void>({
-      query: () => "/users",
-      providesTags: ["Users"],
+      invalidatesTags: ["Agencies"],
     }),
     getExpensesByCategory: build.query<ExpenseByCategorySummary[], void>({
       query: () => "/expenses",
@@ -101,8 +109,6 @@ export const api = createApi({
 
 export const {
   useGetDashboardMetricsQuery,
-  useGetProductsQuery,
   useCreateProductMutation,
-  useGetUsersQuery,
   useGetExpensesByCategoryQuery,
 } = api;

@@ -45,11 +45,16 @@ const themes = {
   light: {
     ...lightTheme,
     white: "#ffffff",
+    primary: "#16927E",
+    "primary-hover": "#1f6c5f",
+    secondary: "#F2D457",
   },
   dark: {
     ...darkTheme,
     white: colors.gray["950"],
     black: colors.gray["50"],
+    primary: "#16927E",
+    secondary: "#F2D457",
   },
 };
 

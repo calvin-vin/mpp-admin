@@ -27,7 +27,7 @@ const ProgressBar = ({ value }: { value: number }) => {
   return (
     <div className="w-full bg-gray-200 rounded-full h-4">
       <div
-        className="bg-gradient-to-r from-[#16927E] to-[#F2D457] h-4 rounded-full transition-all duration-1000"
+        className="bg-gradient-to-r from-primary to-secondary h-4 rounded-full transition-all duration-1000"
         style={{ width: `${width}%` }}
       ></div>
     </div>
@@ -40,7 +40,7 @@ const CardSatisfaction: React.FC = () => {
     <div className="flex flex-col items-center md:flex-row justify-between row-span-2 xl:row-span-3 col-span-1 md:col-span-2 xl:col-span-1 bg-white shadow-md rounded-2xl ">
       {/* Kolom Kiri: Nilai IKM */}
       <div className="md:w-1/3 w-full p-4 flex flex-col items-center border-b md:border-b-0 md:border-r border-gray-300">
-        <ChartLine className="text-[#16927E] text-5xl mb-4" />
+        <ChartLine className="text-primary text-5xl mb-4" />
         <h2 className="text-4xl font-bold">85.5</h2>
         <p className="text-gray-700 text-center mt-2">
           Indeks Kepuasan Masyarakat (IKM)
@@ -55,7 +55,7 @@ const CardSatisfaction: React.FC = () => {
               <span className="text-md font-medium text-gray-800">
                 {param.name}
               </span>
-              <span className="text-md font-medium text-[#16927E]">
+              <span className="text-md font-medium text-primary">
                 {param.value}%
               </span>
             </div>
