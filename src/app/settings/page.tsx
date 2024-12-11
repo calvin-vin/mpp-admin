@@ -99,7 +99,7 @@ const Setting = () => {
         error.data?.message || "Gagal memperbarui konfigurasi";
 
       toast.error(errorMessage);
-      console.error("Error detail:", error);
+      console.error("Error details:", error);
     }
   };
 
