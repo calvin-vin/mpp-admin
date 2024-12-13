@@ -14,8 +14,7 @@ export const formSchema = z.object({
   jenis_permohonan: z
     .string()
     .min(1, { message: "Jenis Permohonan harus dipilih" }),
-  hadir: z.boolean(),
-  mengisi_ikm: z.enum(["1", "0"], { message: "Status IKM harus dipilih" }),
+  mobile: z.string().min(1, { message: "No HP harus diisi" }),
   tanggal: z.date({ message: "Harus merupakan tanggal" }),
   jam: z.string().min(1, { message: "Jam harus diisi" }),
 });

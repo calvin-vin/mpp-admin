@@ -1,15 +1,18 @@
 "use client";
 
 import { BackButton } from "@/app/(components)/BackButton";
+import ErrorDisplay from "@/app/(components)/ErrorDisplay";
+import LoadingSpinner from "@/app/(components)/LoadingSpinner";
 import { RenderFieldError } from "@/app/(components)/RenderFieldError";
+import useRoles from "@/hooks/useRoles";
 import {
   useGetSingleUserQuery,
   useUpdateUserMutation,
 } from "@/state/userSlice";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Edit, PlusCircle } from "lucide-react";
+import { Edit } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import * as z from "zod";
@@ -23,18 +26,28 @@ const formSchema = z.object({
   email: z.string().email({ message: "Email tidak valid" }),
   mobile: z.string().min(8, { message: "Nomor HP minimal 8 karakter" }),
   status: z.enum(["ACTIVE", "INACTIVE"], { message: "Status harus dipilih" }),
-  id_role: z.coerce.number().min(1, { message: "Role harus dipilih" }),
+  id_role: z.string().min(1, { message: "Role harus dipilih" }),
 });
 
-// Definisi tipe berdasarkan skema
 type FormData = z.infer<typeof formSchema>;
 
 const EditUser = () => {
   const router = useRouter();
   const { id } = useParams();
+  const {
+    roleList,
+    isLoading: isLoadingRoles,
+    error: roleError,
+    refetch: refetchRoles,
+  } = useRoles();
 
   // Query untuk mendapatkan data user
-  const { data: userData, isLoading: isLoadingUser } = useGetSingleUserQuery({
+  const {
+    data: userData,
+    isLoading: isLoadingUser,
+    refetch: refetchUser,
+    error: userError,
+  } = useGetSingleUserQuery({
     id,
   });
 
@@ -70,6 +83,7 @@ const EditUser = () => {
       const submitData = new FormData();
 
       // Tambahkan semua field dari form
+      submitData.append("id", id as string);
       submitData.append("nip", formData.nip);
       submitData.append("nama_lengkap", formData.nama_lengkap);
       submitData.append("email", formData.email);
@@ -93,21 +107,27 @@ const EditUser = () => {
     }
   };
 
-  // Opsi Role (disesuaikan dengan kebutuhan)
-  const roleOptions = [
-    { value: "", label: "Pilih Role" },
-    { value: "1", label: "Admin" },
-    { value: "2", label: "Operator" },
-    { value: "3", label: "Supervisor" },
-  ];
+  const roleMenuItems = useMemo(
+    () =>
+      roleList.map((role) => (
+        <option key={role.value} value={role.value.toString()}>
+          {role.label}
+        </option>
+      )),
+    [roleList]
+  );
 
-  // Loading state
-  if (isLoadingUser) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        Loading...
-      </div>
-    );
+  if (roleError || userError) {
+    <ErrorDisplay
+      callback={() => {
+        refetchRoles();
+        refetchUser();
+      }}
+    />;
+  }
+
+  if (isLoadingUser || isLoadingRoles) {
+    return <LoadingSpinner />;
   }
 
   return (
@@ -204,11 +224,7 @@ const EditUser = () => {
               {...register("id_role")}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              {roleOptions.map((role) => (
-                <option key={role.value} value={role.value}>
-                  {role.label}
-                </option>
-              ))}
+              {roleMenuItems}
             </select>
             {errors.id_role && (
               <p className="text-red-500 text-sm mt-1">

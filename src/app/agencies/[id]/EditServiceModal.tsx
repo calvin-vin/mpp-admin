@@ -78,7 +78,7 @@ const EditServiceModal: React.FC<EditServiceModalProps> = ({
   const onSubmit = async (data: EditServiceFormData) => {
     try {
       const payload = {
-        id: serviceId,
+        id_layanan: serviceId,
         layanan: data.layanan,
         deskripsi: data.deskripsi || "",
         id_instansi: agencyId,

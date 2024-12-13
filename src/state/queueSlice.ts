@@ -15,8 +15,7 @@ export interface Queue {
   pekerjaan: string;
   tanggal: string;
   jam: string;
-  hadir: string;
-  mengisi_ikm: string;
+  mobile: string;
   id_layanan: string;
   created_at: string;
   updated_at: string;
@@ -130,6 +129,34 @@ export const queueSlice = apiSlice.injectEndpoints({
       ],
     }),
 
+    updateQueueStatusToPresent: build.mutation({
+      query: (data) => {
+        return {
+          url: `/antrian/status/present`,
+          method: "POST",
+          body: data,
+        };
+      },
+      invalidatesTags: (result, error, { id_antrian }) => [
+        { type: "Queues" as const, id: id_antrian },
+        { type: "Queues" as const, id: "LIST" },
+      ],
+    }),
+
+    updateQueueStatusToFinish: build.mutation({
+      query: (data) => {
+        return {
+          url: `/antrian/status/finish`,
+          method: "POST",
+          body: data,
+        };
+      },
+      invalidatesTags: (result, error, { id_antrian }) => [
+        { type: "Queues" as const, id: id_antrian },
+        { type: "Queues" as const, id: "LIST" },
+      ],
+    }),
+
     deleteQueue: build.mutation({
       query: ({ id }) => ({
         url: `/antrian/delete/${id}`,
@@ -149,4 +176,6 @@ export const {
   useGetSingleQueueQuery,
   useUpdateQueueMutation,
   useCreateQueueMutation,
+  useUpdateQueueStatusToFinishMutation,
+  useUpdateQueueStatusToPresentMutation,
 } = queueSlice;

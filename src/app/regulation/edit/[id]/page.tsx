@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileIcon, SaveIcon } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { Download, SaveIcon } from "lucide-react";
+import { useParams } from "next/navigation";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -15,6 +15,7 @@ import {
   useGetSingleRegulationQuery,
   useUpdateRegulationMutation,
 } from "@/state/regulationSlice";
+import { useRouter } from "next/navigation";
 
 // Skema Validasi Zod
 const regulationSchema = z.object({
@@ -28,6 +29,7 @@ const regulationSchema = z.object({
 type RegulationFormData = z.infer<typeof regulationSchema>;
 
 const EditRegulation: React.FC = () => {
+  const router = useRouter();
   const { id } = useParams();
 
   // Fetch data regulasi yang akan diedit
@@ -75,6 +77,7 @@ const EditRegulation: React.FC = () => {
       await updateRegulation(formData).unwrap();
 
       toast.success("Regulasi berhasil diperbarui");
+      router.push("/regulation");
     } catch (error) {
       console.error("Error:", error);
       toast.error("Gagal memperbarui regulasi");
@@ -132,14 +135,14 @@ const EditRegulation: React.FC = () => {
           {/* Tampilkan file existing */}
           {regulationData?.data?.file_url && (
             <div className="mt-2 flex items-center">
-              <FileIcon className="mr-2 text-blue-500" />
               <a
                 href={regulationData.data.file_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white rounded-full bg-gray-800 my-4 gap-2 hover:bg-gray-700"
               >
-                Lihat File
+                <Download size={18} className="mr-2" />
+                Unduh File
               </a>
             </div>
           )}

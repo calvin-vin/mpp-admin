@@ -31,9 +31,17 @@ interface FilterProps {
   filters: FilterState;
   updateFilters: (updates: Partial<FilterState>) => void;
   onReset: () => void;
+  searchTerm: string;
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const QueueFilter = ({ filters, updateFilters, onReset }: FilterProps) => {
+const QueueFilter = ({
+  filters,
+  updateFilters,
+  onReset,
+  searchTerm,
+  setSearchTerm,
+}: FilterProps) => {
   const { serviceList, isLoading, error, refetch } = useServices();
 
   // Memoize service menu items
@@ -55,7 +63,6 @@ const QueueFilter = ({ filters, updateFilters, onReset }: FilterProps) => {
     [updateFilters]
   );
 
-  // Render loading atau error
   if (isLoading) return <LoadingSpinner />;
   if (error) return <ErrorDisplay callback={refetch} />;
 
@@ -68,8 +75,8 @@ const QueueFilter = ({ filters, updateFilters, onReset }: FilterProps) => {
           <input
             className="w-full py-2 px-2 rounded bg-white"
             placeholder="Cari Antrian..."
-            value={filters.search || ""}
-            onChange={(e) => handleFilterChange("search", e.target.value)}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>

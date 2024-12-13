@@ -101,15 +101,20 @@ export const serviceSlice = apiSlice.injectEndpoints({
 
     // Mutation untuk update service
     updateService: build.mutation({
-      query: (data) => ({
-        url: `/layanan/update`,
-        method: "POST",
-        body: data,
-      }),
-      invalidatesTags: (result, error, { data }) => [
-        { type: "Services", id: `Agencies${data.id_instansi}` },
-        { type: "Agencies", id: data.id_instansi },
-      ],
+      query: (data) => {
+        return {
+          url: `/layanan/update`,
+          method: "POST",
+          body: data,
+        };
+      },
+      invalidatesTags: (result, error, { id_layanan, id_instansi }) => {
+        return [
+          { type: "Services", id: id_layanan },
+          { type: "Services", id: `Agencies${id_instansi}` },
+          { type: "Agencies", id: id_instansi },
+        ];
+      },
     }),
 
     // Mutation untuk menghapus service

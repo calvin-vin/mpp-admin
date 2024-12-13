@@ -10,6 +10,7 @@ import {
   LucideIcon,
   Menu,
   Scale,
+  Shield,
   SlidersHorizontal,
   User,
 } from "lucide-react";
@@ -124,6 +125,12 @@ const Sidebar = () => {
           href="/facilities"
           icon={Armchair}
           label="Fasilitas"
+          isCollapsed={isSidebarCollapsed}
+        />
+        <SidebarLink
+          href="/roles"
+          icon={Shield}
+          label="Roles"
           isCollapsed={isSidebarCollapsed}
         />
         <SidebarLink

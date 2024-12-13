@@ -26,6 +26,7 @@ export const queueSlice = apiSlice.injectEndpoints({
       query: (params = {}) => ({
         url: "/fasilitas/list",
         params: {
+          keyword: params.search || "",
           page: params.page ?? 1,
           per_page: params.perPage ?? 10,
         },

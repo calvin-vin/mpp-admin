@@ -1,29 +1,33 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 interface LoadingSpinnerProps {
   fullScreen?: boolean;
   message?: string;
   className?: string;
+  disableScroll?: boolean;
 }
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   fullScreen = true,
   message = "Sedang memuat...",
   className = "",
+  disableScroll = true,
 }) => {
   useEffect(() => {
     // Mencegah scroll pada body jika full screen
-    if (fullScreen) {
-      document.body.style.overflow = "hidden";
+    if (fullScreen && disableScroll) {
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+
+      document.body.style.setProperty("overflow", "hidden", "important");
 
       return () => {
-        document.body.style.overflow = "unset";
+        document.body.style.overflow = originalStyle;
       };
     }
-  }, [fullScreen]);
+  }, [fullScreen, disableScroll]);
 
   const containerClasses = `
-    ${fullScreen ? "fixed inset-0 z-[9999] bg-white/70" : ""} 
+    ${fullScreen ? "fixed inset-0 z-[9999] bg-white/70 overflow-hidden" : ""} 
     flex justify-center items-center 
     ${className}
   `.trim();

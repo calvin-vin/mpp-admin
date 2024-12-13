@@ -39,7 +39,7 @@ const User = () => {
     perPage: paginationModel.pageSize,
   });
 
-  const [deleteQueue, { isLoading: isLoadingDelete }] = useDeleteUserMutation();
+  const [deleteUser, { isLoading: isLoadingDelete }] = useDeleteUserMutation();
 
   const isLoading = isFetchingAll || isLoadingDelete;
 
@@ -54,7 +54,7 @@ const User = () => {
   const handleCloseModalDelete = () => setShowModalDelete(false);
   const handleConfirmDelete = async () => {
     try {
-      await deleteQueue({ id: dataIdToDelete }).unwrap();
+      await deleteUser({ id: dataIdToDelete }).unwrap();
       toast.success("Berhasil menghapus data");
     } catch (err) {
       toast.error("Gagal menghapus data");
@@ -67,7 +67,7 @@ const User = () => {
     return <ErrorDisplay callback={refetch} />;
   }
 
-  const queues = data?.users || [];
+  const users = data?.users || [];
   const totalCount = data?.pagination.total || 0;
 
   const handlePaginationModelChange = (newModel: any) => {
@@ -105,6 +105,15 @@ const User = () => {
     {
       field: "mobile",
       headerName: "NO HP",
+      minWidth: 150,
+      flex: 1,
+      sortable: false,
+      align: "center",
+      headerAlign: "center",
+    },
+    {
+      field: "role_name",
+      headerName: "Role",
       minWidth: 150,
       flex: 1,
       sortable: false,
@@ -184,7 +193,7 @@ const User = () => {
             <SearchIcon className="w-5 h-5 text-gray-500 ml-3" />
             <input
               className="w-full py-2 px-3 focus:outline-none"
-              placeholder="Cari instansi..."
+              placeholder="Cari pengguna..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -208,10 +217,10 @@ const User = () => {
             totalCount={totalCount}
             paginationModel={paginationModel}
             handlePaginationModelChange={handlePaginationModelChange}
-            loading={isLoading || !queues}
+            loading={isLoading || !users}
             rows={
-              (queues &&
-                queues.map((item, index) => ({
+              (users &&
+                users.map((item, index) => ({
                   "No.":
                     paginationModel.page * paginationModel.pageSize + index + 1,
                   ...item,

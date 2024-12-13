@@ -1,20 +1,19 @@
-import { fetchBaseQuery } from "@reduxjs/toolkit/query";
 import { API_HOST } from "@/utils/constants";
-import { getHeaders } from "@/utils/helpers";
+import { fetchBaseQuery } from "@reduxjs/toolkit/query";
 
 export const customBaseQuery = () => {
   return fetchBaseQuery({
     baseUrl: API_HOST,
     prepareHeaders: (headers, { getState }) => {
-      const headersData = getHeaders();
-
-      // Hanya set header jika nilai tidak kosong
-      // if (headersData["X-Key"]) {
-      //   headers.set("X-Key", headersData["X-Key"]);
+      // Tambahkan token dari localStorage jika ada
+      // const token = localStorage.getItem("token");
+      // const nip = localStorage.getItem("x-key");
+      // if (token) {
+      //   headers.set("Token", token);
       // }
 
-      // if (headersData["Token"]) {
-      //   headers.set("Token", headersData["Token"]);
+      // if (nip) {
+      //   headers.set("X-key", nip);
       // }
 
       headers.set("X-Key", "999999999");

@@ -29,7 +29,11 @@ const FacilityPage = () => {
     isFetching: isLoading,
     isError,
     refetch,
-  } = useGetFacilitiesQuery({ page: 1, perPage: 999 });
+  } = useGetFacilitiesQuery({
+    page: 1,
+    perPage: 999,
+    search: debouncedSearchValue,
+  });
 
   const [deleteFacility, { isLoading: isLoadingDelete }] =
     useDeleteFacilityMutation();
@@ -150,7 +154,7 @@ const FacilityPage = () => {
               </div>
 
               <Link
-                href={`/facilites/${facility.id_fasilitas}`}
+                href={`/facilities/edit/${facility.id_fasilitas}`}
                 className="w-full flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 font-semibold py-2 px-4 rounded-lg transition-colors"
               >
                 <EyeIcon className="w-5 h-5 mr-2" />

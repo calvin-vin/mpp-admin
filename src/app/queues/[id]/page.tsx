@@ -10,10 +10,21 @@ import useServices from "@/hooks/useServices";
 import {
   useGetSingleQueueQuery,
   useUpdateQueueMutation,
+  useUpdateQueueStatusToFinishMutation,
+  useUpdateQueueStatusToPresentMutation,
 } from "@/state/queueSlice";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, SaveIcon } from "lucide-react";
-import { useParams } from "next/navigation";
+import {
+  Box,
+  CalendarIcon,
+  CircleCheckIcon,
+  ClockIcon,
+  SaveIcon,
+  UserCheckIcon,
+} from "lucide-react";
+
+import { formatTanggalIndonesia } from "@/utils/helpers";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import DatePicker from "react-datepicker";
 import { Controller, useForm } from "react-hook-form";
@@ -22,11 +33,11 @@ import {
   FormData,
   formSchema,
   jenisPemohonOptions,
-  mengisiIKMOptions,
   statusKawinOptions,
 } from "../utils";
 
 const QueueDetail = () => {
+  const router = useRouter();
   const { id } = useParams();
   const {
     data,
@@ -35,8 +46,11 @@ const QueueDetail = () => {
     isError: isErrorQueue,
   } = useGetSingleQueueQuery({ id });
   const [updateQueueMutation, { error: errorsAPI }] = useUpdateQueueMutation();
+  const [updateQueueToPresent, { error: errorsUpdateToPresent }] =
+    useUpdateQueueStatusToPresentMutation();
+  const [updateQueueToFinish, { error: errorsUpdateToFinish }] =
+    useUpdateQueueStatusToFinishMutation();
 
-  // Gunakan hook useServices
   const {
     serviceList,
     isLoading: isLoadingServices,
@@ -60,10 +74,6 @@ const QueueDetail = () => {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      hadir: false,
-      mengisi_ikm: "0",
-    },
   });
 
   useEffect(() => {
@@ -76,10 +86,9 @@ const QueueDetail = () => {
         pendidikan: queueData.pendidikan,
         pekerjaan: queueData.pekerjaan,
         status_kawin: queueData.status_kawin,
+        mobile: queueData.mobile,
         id_layanan: queueData.id_layanan.toString(),
         jenis_permohonan: queueData.jenis_permohonan,
-        hadir: queueData.hadir === "1",
-        mengisi_ikm: queueData.mengisi_ikm === "1" ? "1" : "0",
         tanggal: queueData.tanggal ? new Date(queueData.tanggal) : undefined,
         jam: queueData.jam || "",
       });
@@ -93,7 +102,6 @@ const QueueDetail = () => {
         ...formData,
         usia: formData.usia.toString(),
         jam: formData.jam.slice(0, 5),
-        hadir: formData.hadir ? "1" : "0",
         id_layanan: formData.id_layanan,
         tanggal: formData.tanggal
           ? formData.tanggal.toISOString().split("T")[0]
@@ -103,13 +111,51 @@ const QueueDetail = () => {
       await updateQueueMutation(payload).unwrap();
 
       toast.success("Berhasil mengupdate data antrian");
+      router.push("/queues");
     } catch (error: any) {
       console.error("Error:", error);
       toast.error("Gagal memperbarui antrian");
     }
   };
 
-  if (serviceError || isErrorQueue || educationError || jobError) {
+  const handleUpdateToPresent = async () => {
+    try {
+      const payload = {
+        id_antrian: id as string,
+      };
+
+      await updateQueueToPresent(payload).unwrap();
+      toast.success("Berhasil mengubah status antrian menjadi hadir");
+      router.push("/queues");
+    } catch (error: any) {
+      console.error("Error:", error);
+      toast.error("Gagal mengubah status antrian menjadi hadir");
+    }
+  };
+
+  const handleUpdateToFinish = async () => {
+    try {
+      const payload = {
+        id_antrian: id as string,
+      };
+
+      await updateQueueToFinish(payload).unwrap();
+      toast.success("Berhasil mengubah status antrian menjadi selesai");
+      router.push("/queues");
+    } catch (error: any) {
+      console.error("Error:", error);
+      toast.error("Gagal mengubah status antrian menjadi selesai");
+    }
+  };
+
+  if (
+    serviceError ||
+    isErrorQueue ||
+    educationError ||
+    jobError ||
+    errorsUpdateToPresent ||
+    errorsUpdateToFinish
+  ) {
     <ErrorDisplay
       callback={() => {
         refetchServices();
@@ -131,9 +177,68 @@ const QueueDetail = () => {
     <>
       <BackButton />
       <div className="container mx-auto p-6 bg-white rounded-lg">
-        <div className="flex items-center mb-6">
-          <Box className="mr-2" />
-          <h1 className="text-2xl font-bold">#{data.data.kode}</h1>
+        <div className="flex justify-between mb-6">
+          <div className="flex items-center">
+            <Box className="mr-2" />
+            {data.data.kode ? (
+              <h1 className="text-2xl font-bold">#{data.data.kode}</h1>
+            ) : (
+              <h1 className="text-2xl font-bold">Kode masih kosong</h1>
+            )}
+          </div>
+
+          {/* Status Kontrol */}
+          <div className="flex items-center space-x-4">
+            {/* Status BOOKED */}
+            {data.data.status === "BOOKED" && (
+              <button
+                type="button"
+                onClick={handleUpdateToPresent}
+                disabled={isSubmitting}
+                className="flex-1 flex justify-center items-center 
+        bg-yellow-500 text-white font-semibold py-2 px-4 rounded 
+        hover:bg-yellow-600 transition-colors duration-300 
+        disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <UserCheckIcon className="w-5 h-5 mr-2" />
+                Update Status Hadir
+              </button>
+            )}
+
+            {/* Status PRESENT */}
+            {data.data.status === "PRESENT" && (
+              <button
+                type="button"
+                onClick={handleUpdateToFinish}
+                disabled={isSubmitting}
+                className="flex-1 flex justify-center items-center 
+        bg-green-500 text-white font-semibold py-2 px-4 rounded 
+        hover:bg-green-600 transition-colors duration-300 
+        disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <CircleCheckIcon className="w-5 h-5 mr-2" />
+                Update Status Selesai
+              </button>
+            )}
+
+            {/* Status FINISH */}
+            {data.data.status === "FINISH" && (
+              <div className="flex items-center">
+                <span
+                  className="inline-flex items-center 
+          px-3 py-1 
+          rounded-full 
+          bg-green-100 
+          text-green-800 
+          text-sm 
+          font-medium"
+                >
+                  <CircleCheckIcon className="w-4 h-4 mr-1" />
+                  Selesai
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -153,6 +258,24 @@ const QueueDetail = () => {
               </p>
             )}
             {RenderFieldError("nama_lengkap", errorsAPI)}
+          </div>
+
+          {/* No HP */}
+          <div>
+            <label htmlFor="mobile" className="block mb-2">
+              No HP
+            </label>
+            <input
+              {...register("mobile")}
+              className="w-full p-2 border rounded"
+              placeholder="Masukkan no hp"
+            />
+            {errors.mobile && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.mobile.message}
+              </p>
+            )}
+            {RenderFieldError("mobile", errorsAPI)}
           </div>
 
           {/* Umur */}
@@ -362,35 +485,43 @@ const QueueDetail = () => {
             {RenderFieldError("jam", errorsAPI)}
           </div>
 
-          {/* Kehadiran */}
-          <div>
-            <label className="flex items-center">
-              <input type="checkbox" {...register("hadir")} className="mr-2" />
-              Sudah Hadir
-            </label>
-          </div>
+          <div className="bg-gray-100 p-3 rounded-lg space-y-2 text-sm text-gray-700">
+            <div className="flex items-center space-x-2">
+              <ClockIcon className="w-4 h-4 text-gray-500" />
+              <span>
+                Dibuat: {formatTanggalIndonesia(data.data.created_at)}
+              </span>
+            </div>
 
-          {/* Status IKM */}
-          <div>
-            <label htmlFor="mengisi_ikm" className="block mb-2">
-              Status IKM
-            </label>
-            <select
-              {...register("mengisi_ikm")}
-              className="w-full p-2 border rounded"
-            >
-              {mengisiIKMOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            {errors.mengisi_ikm && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.mengisi_ikm.message}
-              </p>
+            {data.data.waktu_wa_daftar_status && (
+              <div className="flex items-center space-x-2 text-gray-500">
+                <CalendarIcon className="w-4 h-4" />
+                <span>
+                  Waktu Pendaftaran WA:{" "}
+                  {formatTanggalIndonesia(data.data.waktu_wa_daftar_status)}
+                </span>
+              </div>
             )}
-            {RenderFieldError("mengisi_ikm", errorsAPI)}
+
+            {data.data.waktu_wa_antrian_status && (
+              <div className="flex items-center space-x-2 text-gray-500">
+                <CalendarIcon className="w-4 h-4" />
+                <span>
+                  Waktu Antrian WA:{" "}
+                  {formatTanggalIndonesia(data.data.waktu_wa_antrian_status)}
+                </span>
+              </div>
+            )}
+
+            {data.data.waktu_wa_selesai && (
+              <div className="flex items-center space-x-2 text-gray-500">
+                <CalendarIcon className="w-4 h-4" />
+                <span>
+                  Waktu Selesai WA:{" "}
+                  {formatTanggalIndonesia(data.data.waktu_wa_selesai)}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Tombol Submit */}

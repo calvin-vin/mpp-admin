@@ -17,11 +17,12 @@ import {
   FormData,
   formSchema,
   jenisPemohonOptions,
-  mengisiIKMOptions,
   statusKawinOptions,
 } from "../utils";
+import { useRouter } from "next/navigation";
 
 const addQueue = () => {
+  const router = useRouter();
   const [createQueueMutation, { error: errorsAPI }] = useCreateQueueMutation();
 
   const {
@@ -46,10 +47,6 @@ const addQueue = () => {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      hadir: false,
-      mengisi_ikm: "0",
-    },
   });
 
   const onSubmit = async (formData: FormData) => {
@@ -58,7 +55,6 @@ const addQueue = () => {
         ...formData,
         usia: formData.usia.toString(),
         jam: formData.jam.slice(0, 5),
-        hadir: formData.hadir ? "1" : "0",
         id_layanan: formData.id_layanan,
         tanggal: formData.tanggal
           ? formData.tanggal.toISOString().split("T")[0]
@@ -66,8 +62,8 @@ const addQueue = () => {
       };
 
       await createQueueMutation(payload).unwrap();
-
       toast.success("Berhasil menambah data antrian");
+      router.push("/queues");
     } catch (error: any) {
       console.error("Error:", error);
       toast.error("Gagal menambah antrian");
@@ -112,6 +108,24 @@ const addQueue = () => {
               </p>
             )}
             {RenderFieldError("nama_lengkap", errorsAPI)}
+          </div>
+
+          {/* No HP */}
+          <div>
+            <label htmlFor="mobile" className="block mb-2">
+              No HP
+            </label>
+            <input
+              {...register("mobile")}
+              className="w-full p-2 border rounded"
+              placeholder="Masukkan no hp"
+            />
+            {errors.mobile && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.mobile.message}
+              </p>
+            )}
+            {RenderFieldError("mobile", errorsAPI)}
           </div>
 
           {/* Umur */}
@@ -319,37 +333,6 @@ const addQueue = () => {
               <p className="text-red-500 text-sm mt-1">{errors.jam.message}</p>
             )}
             {RenderFieldError("jam", errorsAPI)}
-          </div>
-
-          {/* Kehadiran */}
-          <div>
-            <label className="flex items-center">
-              <input type="checkbox" {...register("hadir")} className="mr-2" />
-              Sudah Hadir
-            </label>
-          </div>
-
-          {/* Status IKM */}
-          <div>
-            <label htmlFor="mengisi_ikm" className="block mb-2">
-              Status IKM
-            </label>
-            <select
-              {...register("mengisi_ikm")}
-              className="w-full p-2 border rounded"
-            >
-              {mengisiIKMOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            {errors.mengisi_ikm && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.mengisi_ikm.message}
-              </p>
-            )}
-            {RenderFieldError("mengisi_ikm", errorsAPI)}
           </div>
 
           {/* Tombol Submit */}

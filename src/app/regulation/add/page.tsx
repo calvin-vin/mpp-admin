@@ -59,6 +59,7 @@ const AddRegulation: React.FC = () => {
       await createRegulation(formData).unwrap();
 
       toast.success("Regulasi berhasil ditambahkan");
+      router.push("/regulation");
     } catch (error) {
       console.error("Error:", error);
       toast.error("Gagal menambahkan regulasi");

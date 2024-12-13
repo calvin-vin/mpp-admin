@@ -1,30 +1,27 @@
 "use client";
 
-import Datatable from "@/app/(components)/Datatable";
-import ErrorDisplay from "@/app/(components)/ErrorDisplay";
+import Header from "@/app/(components)/Header";
 import ModalDelete from "@/app/(components)/ModalDelete";
 import useDebounce from "@/hooks/useDebounce";
-import {
-  useDeleteRegulationMutation,
-  useGetRegulationQuery,
-} from "@/state/regulationSlice";
+import { useDeleteRoleMutation, useGetRolesQuery } from "@/state/roleSlice";
 import { DATA_PER_PAGE } from "@/utils/constants";
 import {
   CircleCheck,
-  Download,
   EditIcon,
   LoaderCircleIcon,
   PlusCircle,
+  SearchIcon,
   TrashIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
+import Datatable from "../(components)/Datatable";
+import ErrorDisplay from "../(components)/ErrorDisplay";
+import { DataGrid } from "@mui/x-data-grid";
 
-const Regulation = () => {
+const Role = () => {
   const [search, setSearch] = useState("");
-  const debouncedSearchValue = useDebounce(search, 1000);
-
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: DATA_PER_PAGE,
@@ -35,70 +32,59 @@ const Regulation = () => {
     isFetching: isFetchingAll,
     isError,
     refetch,
-  } = useGetRegulationQuery({
-    search: debouncedSearchValue,
+  } = useGetRolesQuery({
     page: paginationModel.page + 1,
     perPage: paginationModel.pageSize,
   });
 
-  const [deleteRegulation, { isLoading: isLoadingDelete }] =
-    useDeleteRegulationMutation();
+  const [deleteRole, { isLoading: isLoadingDelete }] = useDeleteRoleMutation();
 
   const isLoading = isFetchingAll || isLoadingDelete;
 
   const [showModalDelete, setShowModalDelete] = useState(false);
   const [dataIdToDelete, setDataIdToDelete] = useState<number | null>(null);
 
-  // Transformasi data dengan id unik
-  const transformedRows = useMemo(() => {
-    return (data?.regulation || []).map((item, index) => ({
-      id: item.id_regulasi,
-      "No.": paginationModel.page * paginationModel.pageSize + index + 1,
-      ...item,
-    }));
-  }, [data, paginationModel]);
-
-  const handleShowModalDelete = useCallback((regulationId: number | null) => {
-    setDataIdToDelete(regulationId);
+  const handleShowModalDelete = (serviceId: number | null) => {
+    setDataIdToDelete(serviceId);
     setShowModalDelete(true);
-  }, []);
+  };
 
-  const handleCloseModalDelete = useCallback(() => {
-    setShowModalDelete(false);
-  }, []);
-
-  const handleConfirmDelete = useCallback(async () => {
+  const handleCloseModalDelete = () => setShowModalDelete(false);
+  const handleConfirmDelete = async () => {
     try {
-      if (dataIdToDelete) {
-        await deleteRegulation({ id: dataIdToDelete }).unwrap();
-        toast.success("Berhasil menghapus data");
-      }
+      await deleteRole({ id: dataIdToDelete }).unwrap();
+      toast.success("Berhasil menghapus data");
     } catch (err) {
       toast.error("Gagal menghapus data");
     }
 
     handleCloseModalDelete();
-  }, [dataIdToDelete, deleteRegulation, handleCloseModalDelete]);
+  };
 
   if (isError) {
     return <ErrorDisplay callback={refetch} />;
   }
 
+  const users = data?.roles || [];
   const totalCount = data?.pagination.total || 0;
+
+  const handlePaginationModelChange = (newModel: any) => {
+    setPaginationModel(newModel);
+  };
 
   const columns = [
     {
       field: "No.",
       headerName: "No.",
       width: 80,
-      align: "center",
-      headerAlign: "center",
       editable: false,
       sortable: false,
+      align: "center",
+      headerAlign: "center",
     },
     {
-      field: "judul",
-      headerName: "Judul",
+      field: "nama",
+      headerName: "Role",
       minWidth: 150,
       flex: 1,
       sortable: false,
@@ -106,30 +92,7 @@ const Regulation = () => {
       headerAlign: "center",
     },
     {
-      field: "file_url",
-      headerName: "File",
-      minWidth: 150,
-      flex: 1,
-      sortable: false,
-      align: "center",
-      headerAlign: "center",
-      renderCell: (params: any) =>
-        params.row.file_url ? (
-          <a
-            href={params.row.file_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white rounded-full bg-gray-800 my-4 gap-2 hover:bg-gray-700"
-          >
-            <Download size={18} className="mr-2" />
-            Unduh File
-          </a>
-        ) : (
-          <span className="text-gray-400 italic">Tidak ada file</span>
-        ),
-    },
-    {
-      field: "aktif",
+      field: "status",
       headerName: "Status",
       minWidth: 150,
       flex: 1,
@@ -137,7 +100,7 @@ const Regulation = () => {
       align: "center",
       headerAlign: "center",
       renderCell: (params: any) => {
-        const isActive = params.row.aktif === "1";
+        const isActive = params.row.status == "ACTIVE";
         if (isActive) {
           return (
             <span className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white rounded-full bg-green-700 my-4 gap-2">
@@ -168,14 +131,14 @@ const Regulation = () => {
         return (
           <div className="flex space-x-2">
             <Link
-              href={`/regulation/edit/${params.row.id_regulasi}`}
+              href={`/roles/edit/${params.row.id}`}
               className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 my-4 gap-2"
             >
               <EditIcon size={18} />
               <p>Edit</p>
             </Link>
             <button
-              onClick={() => handleShowModalDelete(params.row.id_regulasi)}
+              onClick={() => handleShowModalDelete(params.row.id)}
               className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white rounded-lg bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 my-4 gap-2"
             >
               <TrashIcon size={18} />
@@ -190,26 +153,20 @@ const Regulation = () => {
   return (
     <>
       <div className="mx-auto pb-5 w-full">
-        {/* SEARCH INPUT */}
-        <div className="mb-4 flex items-center">
-          <input
-            type="text"
-            placeholder="Cari regulasi..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+        {/* HEADER BAR */}
+        <div className="flex justify-between items-center mb-6">
+          <Header name="Role" />
         </div>
 
         {/* BUTTON ADD */}
         <div className="flex justify-end mb-4">
           <Link
-            href={`/regulation/add`}
+            href={`/roles/add`}
             className={`flex items-center bg-primary text-white font-semibold py-2 px-4 rounded 
                 hover:bg-primary-hover`}
           >
             <PlusCircle className="w-5 h-5 mr-2" />
-            Tambah Instansi
+            Tambah Role
           </Link>
         </div>
 
@@ -217,11 +174,17 @@ const Regulation = () => {
           <Datatable
             totalCount={totalCount}
             paginationModel={paginationModel}
-            handlePaginationModelChange={(newModel) =>
-              setPaginationModel(newModel)
+            handlePaginationModelChange={handlePaginationModelChange}
+            loading={isLoading || !users}
+            rows={
+              (users &&
+                users.map((item, index) => ({
+                  "No.":
+                    paginationModel.page * paginationModel.pageSize + index + 1,
+                  ...item,
+                }))) ||
+              []
             }
-            loading={isLoading || !data}
-            rows={transformedRows}
             columns={columns}
           />
         </div>
@@ -237,4 +200,4 @@ const Regulation = () => {
   );
 };
 
-export default Regulation;
+export default Role;

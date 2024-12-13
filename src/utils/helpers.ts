@@ -34,3 +34,30 @@ export const formattedTime = (date: Date) => {
     hour12: false,
   });
 };
+
+export const formatTanggalIndonesia = (tanggal: Date | string) => {
+  const date = tanggal instanceof Date ? tanggal : new Date(tanggal);
+
+  // Daftar nama bulan dalam bahasa Indonesia
+  const bulan = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+
+  // Fungsi untuk menambahkan leading zero
+  const pad = (num: number) => num.toString().padStart(2, "0");
+
+  return `${pad(date.getDate())} ${
+    bulan[date.getMonth()]
+  } ${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};

@@ -8,13 +8,17 @@ import { usePusherSubscription } from "@/hooks/usePusherSubscription";
 import { useDeleteQueueMutation, useGetQueuesQuery } from "@/state/queueSlice";
 import { DATA_PER_PAGE } from "@/utils/constants";
 import {
+  AlertCircleIcon,
   CircleCheck,
+  CircleCheckIcon,
+  ClockIcon,
   EditIcon,
   LoaderCircleIcon,
   PlusCircle,
   TrashIcon,
+  UserCheckIcon,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Datatable from "../(components)/Datatable";
 import ErrorDisplay from "../(components)/ErrorDisplay";
 import QueueFilter from "./QueueFilter";
@@ -58,6 +62,9 @@ const Queue = () => {
     },
   });
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 500);
+
   // Fungsi update filter
   const updateFilters = useCallback((updates: Partial<FilterState>) => {
     setFilters((prevFilters) => ({
@@ -65,6 +72,11 @@ const Queue = () => {
       ...updates,
     }));
   }, []);
+
+  // Efek untuk update filter ketika search berubah
+  useEffect(() => {
+    updateFilters({ search: debouncedSearch });
+  }, [debouncedSearch, updateFilters]);
 
   // Fungsi reset filter
   const resetFilters = useCallback(() => {
@@ -77,6 +89,8 @@ const Queue = () => {
         to: null,
       },
     });
+    // Reset search term
+    setSearchTerm("");
   }, []);
 
   const [paginationModel, setPaginationModel] = useState({
@@ -166,7 +180,11 @@ const Queue = () => {
       align: "center",
       headerAlign: "center",
       renderCell: (params: any) => {
-        return <span className="font-bold">#{params.row.kode}</span>;
+        if (params.row.kode) {
+          return <span className="font-bold">#{params.row.kode}</span>;
+        } else {
+          return <span>-</span>;
+        }
       },
     },
     {
@@ -179,7 +197,7 @@ const Queue = () => {
       headerAlign: "center",
     },
     {
-      field: "layanan",
+      field: "nama_layanan",
       headerName: "Layanan",
       minWidth: 150,
       flex: 1,
@@ -187,7 +205,28 @@ const Queue = () => {
       align: "center",
       headerAlign: "center",
       renderCell: (params: any) => {
-        return params.row.nama_lengkap;
+        const namaLayanan = params.row.nama_layanan;
+        const namaInstansi = params.row.nama_instansi;
+
+        return (
+          <div className="flex flex-col items-center justify-center text-center w-full">
+            <span
+              className="text-sm font-medium leading-tight 
+              max-w-full truncate block"
+              title={namaLayanan}
+            >
+              {namaLayanan}
+            </span>
+            <span
+              className="text-xs text-gray-600 leading-tight 
+              max-w-full break-words overflow-hidden 
+              whitespace-normal line-clamp-2"
+              title={namaInstansi}
+            >
+              {namaInstansi}
+            </span>
+          </div>
+        );
       },
     },
     {
@@ -199,22 +238,52 @@ const Queue = () => {
       align: "center",
       headerAlign: "center",
       renderCell: (params: any) => {
-        const isAttend = params.row.hadir == 1;
-        if (isAttend) {
-          return (
-            <span className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white rounded-full bg-green-700 my-4 gap-2">
-              <CircleCheck size={18} />
-              <p>Selesai</p>
-            </span>
-          );
-        } else {
-          return (
-            <span className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white rounded-full bg-yellow-700 my-4 gap-2">
-              <LoaderCircleIcon size={18} />
-              <p>Dalam Proses</p>
-            </span>
-          );
-        }
+        const status = params.row.status?.toUpperCase();
+
+        const statusConfig = {
+          BOOKED: {
+            color: "bg-blue-600",
+            icon: <ClockIcon size={18} />,
+            label: "Booked",
+          },
+          PRESENT: {
+            color: "bg-yellow-600",
+            icon: <UserCheckIcon size={18} />,
+            label: "Proses",
+          },
+          FINISH: {
+            color: "bg-green-600",
+            icon: <CircleCheckIcon size={18} />,
+            label: "Selesai",
+          },
+          DEFAULT: {
+            color: "bg-gray-500",
+            icon: <AlertCircleIcon size={18} />,
+            label: "Status Tidak Dikenal",
+          },
+        };
+
+        const statusData =
+          statusConfig[status as keyof typeof statusConfig] ||
+          statusConfig.DEFAULT;
+
+        return (
+          <span
+            className={`
+              inline-flex items-center 
+              px-4 py-1.5 
+              text-sm font-medium 
+              text-center text-white 
+              rounded-full 
+              ${statusData.color} 
+              my-2 
+              gap-2
+            `}
+          >
+            {statusData.icon}
+            <p>{statusData.label}</p>
+          </span>
+        );
       },
     },
     {
@@ -284,6 +353,8 @@ const Queue = () => {
           filters={filters}
           updateFilters={updateFilters}
           onReset={resetFilters}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
         />
 
         {/* BUTTON ADD */}

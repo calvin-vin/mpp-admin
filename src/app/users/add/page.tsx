@@ -1,12 +1,15 @@
 "use client";
 
 import { BackButton } from "@/app/(components)/BackButton";
+import ErrorDisplay from "@/app/(components)/ErrorDisplay";
+import LoadingSpinner from "@/app/(components)/LoadingSpinner";
 import { RenderFieldError } from "@/app/(components)/RenderFieldError";
+import useRoles from "@/hooks/useRoles";
 import { useCreateUserMutation } from "@/state/userSlice";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import * as z from "zod";
@@ -20,7 +23,7 @@ const formSchema = z.object({
   email: z.string().email({ message: "Email tidak valid" }),
   mobile: z.string().min(8, { message: "Nomor HP minimal 8 karakter" }),
   status: z.enum(["ACTIVE", "INACTIVE"], { message: "Status harus dipilih" }),
-  id_role: z.coerce.number().min(1, { message: "Role harus dipilih" }),
+  id_role: z.string().min(1, { message: "Role harus dipilih" }),
 });
 
 // Definisi tipe berdasarkan skema
@@ -28,13 +31,12 @@ type FormData = z.infer<typeof formSchema>;
 
 const AddUser = () => {
   const router = useRouter();
+  const { roleList, isLoading, error, refetch } = useRoles();
   const [createUser, { error: errorsAPI }] = useCreateUserMutation();
-  const [profileFile, setProfileFile] = useState<File | null>(null);
 
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -68,13 +70,18 @@ const AddUser = () => {
     }
   };
 
-  // Opsi Role (disesuaikan dengan kebutuhan)
-  const roleOptions = [
-    { value: "", label: "Pilih Role" },
-    { value: "1", label: "Admin" },
-    { value: "2", label: "Operator" },
-    { value: "3", label: "Supervisor" },
-  ];
+  const roleMenuItems = useMemo(
+    () =>
+      roleList.map((role) => (
+        <option key={role.value} value={role.value.toString()}>
+          {role.label}
+        </option>
+      )),
+    [roleList]
+  );
+
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <ErrorDisplay callback={refetch} />;
 
   return (
     <>
@@ -168,11 +175,7 @@ const AddUser = () => {
               {...register("id_role")}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              {roleOptions.map((role) => (
-                <option key={role.value} value={role.value}>
-                  {role.label}
-                </option>
-              ))}
+              {roleMenuItems}
             </select>
             {errors.id_role && (
               <p className="text-red-500 text-sm mt-1">
