@@ -6,8 +6,17 @@ import CardServiceSummary from "./CardServiceSummary";
 import CardTotalService from "./CardTotalService";
 import CardVisitorSummary from "./CardVisitorSummary";
 import { useGetDashboardSummaryQuery } from "@/state/dashboardSlice";
+import { AuthorizationWrapper } from "../(components)/AuthorizationWrapper";
 
 const Dashboard = () => {
+  return (
+    <AuthorizationWrapper>
+      <div className="flex items-center justify-center">
+        Fitur Dalam Tahap Pengembangan
+      </div>
+    </AuthorizationWrapper>
+  );
+
   const {
     data: dashboardData,
     isLoading,

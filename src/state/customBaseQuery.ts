@@ -1,26 +1,35 @@
+// src/state/customBaseQuery.ts
 import { API_HOST } from "@/utils/constants";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query";
+
+interface User {
+  nip: string;
+}
 
 export const customBaseQuery = () => {
   return fetchBaseQuery({
     baseUrl: API_HOST,
     prepareHeaders: (headers, { getState }) => {
-      // Tambahkan token dari localStorage jika ada
-      // const token = localStorage.getItem("token");
-      // const nip = localStorage.getItem("x-key");
-      // if (token) {
-      //   headers.set("Token", token);
-      // }
+      const token = localStorage.getItem("token");
+      const userString = localStorage.getItem("user");
 
-      // if (nip) {
-      //   headers.set("X-key", nip);
-      // }
+      if (token) {
+        headers.set("Token", token);
+      }
 
-      headers.set("X-Key", "999999999");
-      headers.set(
-        "Token",
-        "bWkDHQLFtWlGy77KeS0qqq7i6pwdhpCgGhHtrggARhIS6aNyfyviLwkUTsR1v7Jo"
-      );
+      if (userString) {
+        try {
+          // Parse string JSON menjadi objek
+          const user: User = JSON.parse(userString);
+
+          // Gunakan nip dari objek user
+          if (user.nip) {
+            headers.set("X-key", user.nip);
+          }
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+        }
+      }
 
       return headers;
     },

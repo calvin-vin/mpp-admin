@@ -1,27 +1,29 @@
-import { useRef } from "react";
+// src/app/redux.tsx
+import globalReducer from "@/state";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { setupListeners } from "@reduxjs/toolkit/query";
+import { useRef } from "react";
 import {
+  Provider,
   TypedUseSelectorHook,
   useDispatch,
   useSelector,
-  Provider,
 } from "react-redux";
-import globalReducer from "@/state";
-import { setupListeners } from "@reduxjs/toolkit/query";
 
+import { apiSlice } from "@/state/apiSlice";
+import authReducer from "@/state/authSlice";
 import {
-  persistStore,
-  persistReducer,
   FLUSH,
-  REHYDRATE,
   PAUSE,
   PERSIST,
+  persistReducer,
+  persistStore,
   PURGE,
   REGISTER,
+  REHYDRATE,
 } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
-import { apiSlice } from "@/state/apiSlice";
 
 /* REDUX PERSISTENCE */
 const createNoopStorage = () => {
@@ -46,10 +48,11 @@ const storage =
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["global"],
+  whitelist: ["global", "auth"],
 };
 const rootReducer = combineReducers({
   global: globalReducer,
+  auth: authReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
 });
 const persistedReducer = persistReducer(persistConfig, rootReducer);

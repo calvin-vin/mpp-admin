@@ -14,8 +14,10 @@ import {
   SlidersHorizontal,
   User,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ROLE_ROUTES } from "@/utils/authorization";
 
 interface SidebarLinkProps {
   href: string;
@@ -56,15 +58,40 @@ const SidebarLink = ({
   );
 };
 
+// Definisikan mapping icon dan label untuk setiap route
+const SIDEBAR_ROUTES = {
+  "/dashboard": { icon: Layout, label: "Dashboard" },
+  "/agencies": { icon: Building, label: "Instansi" },
+  "/queues": { icon: Clipboard, label: "Antrian" },
+  "/regulation": { icon: Scale, label: "Regulasi" },
+  "/facilities": { icon: Armchair, label: "Fasilitas" },
+  "/roles": { icon: Shield, label: "Roles" },
+  "/users": { icon: User, label: "Users" },
+  "/settings": { icon: SlidersHorizontal, label: "Settings" },
+};
+
 const Sidebar = () => {
   const dispatch = useAppDispatch();
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed
   );
+  const { user } = useAppSelector((state) => state.auth);
 
   const toggleSidebar = () => {
     dispatch(setIsSidebarCollapsed(!isSidebarCollapsed));
   };
+
+  // Dapatkan routes yang diizinkan berdasarkan role
+  const allowedRoutes = user?.nama_role
+    ? ROLE_ROUTES[user.nama_role] || []
+    : [];
+
+  // Filter routes berdasarkan role
+  const filteredRoutes = Object.keys(SIDEBAR_ROUTES).filter((route) =>
+    allowedRoutes.some((allowedRoute) =>
+      new RegExp(`^${allowedRoute.replace("*", ".*")}$`).test(route)
+    )
+  );
 
   const sidebarClassNames = `fixed flex flex-col ${
     isSidebarCollapsed ? "w-0 md:w-16" : "w-72 md:w-64"
@@ -78,14 +105,15 @@ const Sidebar = () => {
           isSidebarCollapsed ? "px-5" : "px-8"
         }`}
       >
-        <div>logo</div>
-        <h1
-          className={`${
-            isSidebarCollapsed ? "hidden" : "block"
-          } font-extrabold text-2xl`}
-        >
-          CNSTOCK
-        </h1>
+        <div>
+          <Image
+            src={"/assets/logo/MPP.png"}
+            alt={"MPP Logo"}
+            width={120}
+            height={120}
+            className="mr-4"
+          />
+        </div>
 
         <button
           className="md:hidden px-3 py-3 bg-gray-100 rounded-full hover:bg-blue-100"
@@ -97,59 +125,25 @@ const Sidebar = () => {
 
       {/* LINKS */}
       <div className="flex-grow mt-8">
-        <SidebarLink
-          href="/dashboard"
-          icon={Layout}
-          label="Dashboard"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/agencies"
-          icon={Building}
-          label="Instansi"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/queues"
-          icon={Clipboard}
-          label="Antrian"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/regulation"
-          icon={Scale}
-          label="Regulasi"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/facilities"
-          icon={Armchair}
-          label="Fasilitas"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/roles"
-          icon={Shield}
-          label="Roles"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/users"
-          icon={User}
-          label="Users"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/settings"
-          icon={SlidersHorizontal}
-          label="Settings"
-          isCollapsed={isSidebarCollapsed}
-        />
+        {filteredRoutes.map((route) => {
+          const { icon: Icon, label } =
+            SIDEBAR_ROUTES[route as keyof typeof SIDEBAR_ROUTES];
+
+          return (
+            <SidebarLink
+              key={route}
+              href={route}
+              icon={Icon}
+              label={label}
+              isCollapsed={isSidebarCollapsed}
+            />
+          );
+        })}
       </div>
 
       {/* FOOTER */}
       <div className={`${isSidebarCollapsed ? "hidden" : "block"} mb-10`}>
-        <p className="text-center text-xs text-gray-500">&copy; 2024 CnStock</p>
+        <p className="text-center text-xs text-gray-500">&copy; 2024</p>
       </div>
     </div>
   );

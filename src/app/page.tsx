@@ -1,5 +1,11 @@
-import Dashboard from "@/app/dashboard/page";
+// src/app/page.tsx
+"use client";
+
+import { useQueryAuth } from "@/hooks/useQueryAuth";
+import LoadingSpinner from "./(components)/LoadingSpinner";
 
 export default function Home() {
-  return <Dashboard />;
+  useQueryAuth();
+
+  return <LoadingSpinner />;
 }

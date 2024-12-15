@@ -31,8 +31,9 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const Setting = () => {
-  const { data: settingData, isLoading: isLoadingSetting } =
-    useGetSettingQuery();
+  const { data: settingData, isLoading: isLoadingSetting } = useGetSettingQuery(
+    {}
+  );
   const [updateSetting, { error: errorsAPI }] = useUpdateSettingMutation();
 
   const {
@@ -248,7 +249,7 @@ const Setting = () => {
             {/* Tampilkan logo lama jika ada */}
             {settingData?.data?.logo && !logoFile && (
               <div className="mt-2">
-                <Image
+                <img
                   src={settingData.data.logo}
                   alt="Logo Instansi"
                   width={200}

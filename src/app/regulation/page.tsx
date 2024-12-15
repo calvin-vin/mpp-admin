@@ -104,6 +104,22 @@ const Regulation = () => {
       sortable: false,
       align: "center",
       headerAlign: "center",
+      renderCell: (params: any) => {
+        const judul = params.row.judul;
+
+        return (
+          <div className="flex flex-col items-center justify-center text-center w-full">
+            <span
+              className="leading-tight 
+              max-w-full break-words overflow-hidden 
+              whitespace-normal line-clamp-2"
+              title={judul}
+            >
+              {judul}
+            </span>
+          </div>
+        );
+      },
     },
     {
       field: "file_url",
