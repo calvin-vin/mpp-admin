@@ -10,7 +10,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import toast from "react-hot-toast";
-import { imageValidation } from "@/utils/helpers";
+import { createImageValidation } from "@/utils/helpers";
 
 // Skema Validasi Zod
 const formSchema = z.object({
@@ -21,7 +21,7 @@ const formSchema = z.object({
     .number()
     .min(1, { message: "Jumlah petugas harus lebih dari 0" }),
   aktif: z.boolean(),
-  logo: imageValidation,
+  logo: createImageValidation(),
 });
 
 // Definisi tipe berdasarkan skema
@@ -182,6 +182,11 @@ const AddAgency = () => {
               onChange={handleLogoChange}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
             />
+            {errors.logo && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.logo.message as string}
+              </p>
+            )}
             {logoFile && (
               <div className="mt-2">
                 <img

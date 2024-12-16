@@ -118,7 +118,7 @@ const QueueFilter = ({
         <div className="flex flex-col gap-2">
           <DatePicker
             selected={filters.dateRange?.from || null}
-            onChange={(date) =>
+            onChange={(date: Date | null) =>
               handleFilterChange("dateRange", {
                 ...filters.dateRange,
                 from: date,
@@ -133,7 +133,7 @@ const QueueFilter = ({
           />
           <DatePicker
             selected={filters.dateRange?.to || null}
-            onChange={(date) =>
+            onChange={(date: Date | null) =>
               handleFilterChange("dateRange", {
                 ...filters.dateRange,
                 to: date,

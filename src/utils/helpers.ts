@@ -72,40 +72,98 @@ const ACCEPTED_IMAGE_TYPES = [
   "image/webp",
 ];
 
-export const imageValidation = z
-  .any()
-  .refine((files) => files?.length == 1, "Image is required.")
-  .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
-  .refine(
-    (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
-    ".jpg, .jpeg, .png and .webp files are accepted."
-  );
+export function createImageValidation(
+  options: {
+    required?: boolean;
+    maxSize?: number;
+  } = {}
+) {
+  const { required = true, maxSize = MAX_FILE_SIZE } = options;
 
-export const multipleImageValidation = z
-  .array(z.instanceof(File))
-  .optional()
-  .refine(
-    (files) => {
-      // Jika tidak ada file, anggap valid
-      if (!files || files.length === 0) return true;
+  // Jika tidak required, izinkan null atau undefined
+  if (!required) {
+    return z.union([
+      z.null(),
+      z.undefined(),
+      z.instanceof(File).refine((file) => {
+        // Jika file ada, lakukan validasi
+        if (!file) return true;
 
-      // Validasi setiap file
-      return files.every((file) => {
-        // Pastikan adalah instance File
-        if (!(file instanceof File)) return false;
+        // Validasi ukuran
+        if (file.size > maxSize) {
+          throw new Error(`Ukuran maksimal file ${maxSize / 1024 / 1024}MB.`);
+        }
 
-        // Validasi ukuran file
-        if (file.size > MAX_FILE_SIZE) return false;
+        // Validasi tipe
+        if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+          throw new Error(
+            "Hanya ekstensi .jpg, .jpeg, .png and .webp yang didukung."
+          );
+        }
 
-        // Validasi tipe file
-        return ACCEPTED_IMAGE_TYPES.includes(file.type);
-      });
-    },
-    {
-      message:
-        "File tidak valid. Pastikan ukuran < 5MB dan format jpg/jpeg/png/webp.",
-    }
-  )
-  .refine((files) => !files || files.length <= 3, {
-    message: "Maksimal 3 file yang dapat diunggah",
-  });
+        return true;
+      }),
+    ]);
+  }
+
+  // Jika required, gunakan validasi penuh
+  return z
+    .instanceof(File, { message: "File masih kosong" })
+    .refine((file) => {
+      // Pastikan file tidak kosong
+      return file.size > 0;
+    }, "File masih kosong")
+    .refine((file) => {
+      // Validasi ukuran maksimal
+      return file.size <= maxSize;
+    }, `Ukuran maksimal file ${maxSize / 1024 / 1024}MB.`)
+    .refine(
+      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+      "Hanya ekstensi .jpg, .jpeg, .png and .webp yang didukung."
+    );
+}
+
+export function createMultipleImageValidation(
+  options: {
+    maxFiles?: number;
+    maxFileSize?: number;
+    allowedTypes?: string[];
+  } = {}
+) {
+  const {
+    maxFiles = 3,
+    maxFileSize = MAX_FILE_SIZE,
+    allowedTypes = ACCEPTED_IMAGE_TYPES,
+  } = options;
+
+  return z
+    .array(z.instanceof(File))
+    .optional()
+    .refine(
+      (files) => {
+        // Jika tidak ada file, anggap valid
+        if (!files || files.length === 0) return true;
+
+        // Validasi jumlah file
+        if (files.length > maxFiles) return false;
+
+        // Validasi setiap file
+        return files.every((file) => {
+          // Pastikan adalah instance File
+          if (!(file instanceof File)) return false;
+
+          // Validasi ukuran file
+          if (file.size > maxFileSize) return false;
+
+          // Validasi tipe file
+          return allowedTypes.includes(file.type);
+        });
+      },
+      {
+        message: `File tidak valid. Pastikan:
+          - Ukuran < ${maxFileSize / 1024 / 1024}MB
+          - Format: ${allowedTypes.join(", ")}
+          - Maksimal ${maxFiles} file`,
+      }
+    );
+}

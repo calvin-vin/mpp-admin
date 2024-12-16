@@ -3,8 +3,8 @@
 import { BackButton } from "@/app/(components)/BackButton";
 import { RenderFieldError } from "@/app/(components)/RenderFieldError";
 import TiptapEditor from "@/app/(components)/TiptapEditor";
-import { useCreateFacilityMutation } from "@/state/facilitySlice"; // Ganti sesuai slice
-import { multipleImageValidation } from "@/utils/helpers";
+import { useCreateFacilityMutation } from "@/state/facilitySlice";
+import { createMultipleImageValidation } from "@/utils/helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircle, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -19,7 +19,7 @@ const formSchema = z.object({
     .string()
     .min(2, { message: "Nama fasilitas minimal 2 karakter" }),
   deskripsi: z.string().min(1, { message: "Deskripsi minimal 1 karakter" }),
-  foto: multipleImageValidation,
+  foto: createMultipleImageValidation(),
   aktif: z.boolean(),
 });
 

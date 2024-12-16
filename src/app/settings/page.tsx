@@ -6,10 +6,9 @@ import {
   useGetSettingQuery,
   useUpdateSettingMutation,
 } from "@/state/settingSlice";
-import { imageValidation } from "@/utils/helpers";
+import { createImageValidation } from "@/utils/helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save } from "lucide-react";
-import Image from "next/image";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -25,7 +24,7 @@ const formSchema = z.object({
   whatsapp: z.string().min(2, { message: "Whatsapp minimal 2 karakter" }),
   footer: z.string().min(2, { message: "Footer minimal 2 karakter" }),
   versi: z.string().min(2, { message: "Versi minimal 2 karakter" }),
-  logo: imageValidation,
+  logo: createImageValidation({ required: false }),
 });
 
 // Definisi tipe berdasarkan skema
@@ -246,6 +245,11 @@ const Setting = () => {
               onChange={handleLogoChange}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
             />
+            {errors.logo && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.logo.message as string}
+              </p>
+            )}
 
             {/* Tampilkan logo lama jika ada */}
             {settingData?.data?.logo && !logoFile && (

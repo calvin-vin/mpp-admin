@@ -1,6 +1,6 @@
 // src/app/redux.tsx
 import globalReducer from "@/state";
-import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { combineReducers, configureStore, Middleware } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { useRef } from "react";
 import {
@@ -24,6 +24,7 @@ import {
 } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
+import { PersistPartial } from "redux-persist/es/persistReducer";
 
 /* REDUX PERSISTENCE */
 const createNoopStorage = () => {
@@ -66,13 +67,13 @@ export const makeStore = () => {
         serializableCheck: {
           ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
         },
-      }).concat(apiSlice.middleware),
+      }).concat(apiSlice.middleware as Middleware<{}, RootState>),
   });
 };
 
 /* REDUX TYPES */
 export type AppStore = ReturnType<typeof makeStore>;
-export type RootState = ReturnType<AppStore["getState"]>;
+export type RootState = ReturnType<typeof rootReducer> & PersistPartial;
 export type AppDispatch = AppStore["dispatch"];
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

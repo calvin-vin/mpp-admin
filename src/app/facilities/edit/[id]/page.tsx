@@ -9,7 +9,7 @@ import {
   useGetSingleFacilityQuery,
   useUpdateFacilityMutation,
 } from "@/state/facilitySlice";
-import { multipleImageValidation } from "@/utils/helpers";
+import { createMultipleImageValidation } from "@/utils/helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircle, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -18,13 +18,12 @@ import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import * as z from "zod";
 
-// Skema Validasi Zod (sama seperti AddFacility)
 const formSchema = z.object({
   nama_fasilitas: z
     .string()
     .min(2, { message: "Nama fasilitas minimal 2 karakter" }),
   deskripsi: z.string().min(1, { message: "Deskripsi minimal 1 karakter" }),
-  foto: multipleImageValidation,
+  foto: createMultipleImageValidation(),
   aktif: z.boolean(),
 });
 
