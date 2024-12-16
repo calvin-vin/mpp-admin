@@ -20,7 +20,7 @@ const formSchema = z.object({
     .number()
     .min(1, { message: "Jumlah petugas harus lebih dari 0" }),
   aktif: z.boolean(),
-  logo: z.instanceof(File).optional(),
+  logo: z.any().optional(),
 });
 
 // Definisi tipe berdasarkan skema
