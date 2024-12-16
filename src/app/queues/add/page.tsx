@@ -21,7 +21,7 @@ import {
 } from "../utils";
 import { useRouter } from "next/navigation";
 
-const addQueue = () => {
+const AddQueue = () => {
   const router = useRouter();
   const [createQueueMutation, { error: errorsAPI }] = useCreateQueueMutation();
 
@@ -353,4 +353,4 @@ const addQueue = () => {
   );
 };
 
-export default addQueue;
+export default AddQueue;

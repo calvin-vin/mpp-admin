@@ -44,31 +44,31 @@ const CardVisitorSummary = () => {
     endDate: format(endOfMonth(new Date()), "yyyy-MM-dd"),
   });
 
-  // Hitung rentang tanggal berdasarkan filter
-  const getDateRange = () => {
-    const today = new Date();
-
-    switch (dateRangeFilter) {
-      case "thisWeek":
-        return {
-          startDate: format(startOfWeek(today), "yyyy-MM-dd"),
-          endDate: format(endOfWeek(today), "yyyy-MM-dd"),
-        };
-      case "thisMonth":
-        return {
-          startDate: format(startOfMonth(today), "yyyy-MM-dd"),
-          endDate: format(endOfMonth(today), "yyyy-MM-dd"),
-        };
-      case "custom":
-        return {
-          startDate: customStartDate,
-          endDate: customEndDate,
-        };
-    }
-  };
-
   // Effect untuk memperbarui query params saat filter berubah
   useEffect(() => {
+    // Hitung rentang tanggal berdasarkan filter
+    const getDateRange = () => {
+      const today = new Date();
+
+      switch (dateRangeFilter) {
+        case "thisWeek":
+          return {
+            startDate: format(startOfWeek(today), "yyyy-MM-dd"),
+            endDate: format(endOfWeek(today), "yyyy-MM-dd"),
+          };
+        case "thisMonth":
+          return {
+            startDate: format(startOfMonth(today), "yyyy-MM-dd"),
+            endDate: format(endOfMonth(today), "yyyy-MM-dd"),
+          };
+        case "custom":
+          return {
+            startDate: customStartDate,
+            endDate: customEndDate,
+          };
+      }
+    };
+
     const newParams =
       dateRangeFilter !== "custom"
         ? getDateRange()
