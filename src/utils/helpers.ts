@@ -1,3 +1,5 @@
+import * as z from "zod";
+
 export const getHeaders = (): { "X-Key"?: string; Token?: string } => {
   const dataString = localStorage.getItem("store");
 
@@ -61,3 +63,49 @@ export const formatTanggalIndonesia = (tanggal: Date | string) => {
     bulan[date.getMonth()]
   } ${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 };
+
+const MAX_FILE_SIZE = 500000;
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
+
+export const imageValidation = z
+  .any()
+  .refine((files) => files?.length == 1, "Image is required.")
+  .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+  .refine(
+    (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
+    ".jpg, .jpeg, .png and .webp files are accepted."
+  );
+
+export const multipleImageValidation = z
+  .array(z.instanceof(File))
+  .optional()
+  .refine(
+    (files) => {
+      // Jika tidak ada file, anggap valid
+      if (!files || files.length === 0) return true;
+
+      // Validasi setiap file
+      return files.every((file) => {
+        // Pastikan adalah instance File
+        if (!(file instanceof File)) return false;
+
+        // Validasi ukuran file
+        if (file.size > MAX_FILE_SIZE) return false;
+
+        // Validasi tipe file
+        return ACCEPTED_IMAGE_TYPES.includes(file.type);
+      });
+    },
+    {
+      message:
+        "File tidak valid. Pastikan ukuran < 5MB dan format jpg/jpeg/png/webp.",
+    }
+  )
+  .refine((files) => !files || files.length <= 3, {
+    message: "Maksimal 3 file yang dapat diunggah",
+  });

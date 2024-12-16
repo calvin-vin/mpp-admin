@@ -6,6 +6,7 @@ import {
   useGetSettingQuery,
   useUpdateSettingMutation,
 } from "@/state/settingSlice";
+import { imageValidation } from "@/utils/helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save } from "lucide-react";
 import Image from "next/image";
@@ -24,7 +25,7 @@ const formSchema = z.object({
   whatsapp: z.string().min(2, { message: "Whatsapp minimal 2 karakter" }),
   footer: z.string().min(2, { message: "Footer minimal 2 karakter" }),
   versi: z.string().min(2, { message: "Versi minimal 2 karakter" }),
-  logo: z.instanceof(File).optional(),
+  logo: imageValidation,
 });
 
 // Definisi tipe berdasarkan skema

@@ -7,6 +7,7 @@ import {
   useGetAgencyByIdQuery,
   useUpdateAgencyMutation,
 } from "@/state/agencySlice";
+import { imageValidation } from "@/utils/helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save } from "lucide-react";
 import Image from "next/image";
@@ -28,7 +29,7 @@ const formSchema = z.object({
     .number()
     .min(1, { message: "Jumlah petugas harus lebih dari 0" }),
   aktif: z.boolean(),
-  logo: z.instanceof(File).optional(),
+  logo: imageValidation,
 });
 
 // Definisi tipe berdasarkan skema
