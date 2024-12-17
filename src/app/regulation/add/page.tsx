@@ -6,27 +6,11 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import * as z from "zod";
 
 import { BackButton } from "@/app/(components)/BackButton";
 import { RenderFieldError } from "@/app/(components)/RenderFieldError";
 import { useCreateRegulationMutation } from "@/state/regulationSlice";
-
-// Skema Validasi Zod
-const regulationSchema = z.object({
-  judul: z.string().min(3, { message: "Judul minimal 3 karakter" }),
-  file: z
-    .any()
-    .refine(
-      (files) => !files || (files instanceof FileList && files.length > 0),
-      {
-        message: "File harus dipilih",
-      }
-    ),
-  aktif: z.enum(["0", "1"]).default("1"),
-});
-
-type RegulationFormData = z.infer<typeof regulationSchema>;
+import { type RegulationFormData, regulationSchema } from "../utils";
 
 const AddRegulation: React.FC = () => {
   const router = useRouter();
@@ -44,7 +28,6 @@ const AddRegulation: React.FC = () => {
     },
   });
 
-  // Submit handler
   const onSubmit = async (data: RegulationFormData) => {
     try {
       const formData = new FormData();

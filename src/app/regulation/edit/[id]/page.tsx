@@ -6,7 +6,6 @@ import { useParams } from "next/navigation";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import * as z from "zod";
 
 import { BackButton } from "@/app/(components)/BackButton";
 import LoadingSpinner from "@/app/(components)/LoadingSpinner";
@@ -16,27 +15,15 @@ import {
   useUpdateRegulationMutation,
 } from "@/state/regulationSlice";
 import { useRouter } from "next/navigation";
-
-// Skema Validasi Zod
-const regulationSchema = z.object({
-  judul: z.string().min(3, { message: "Judul minimal 3 karakter" }),
-  file: z
-    .union([z.instanceof(FileList), z.string(), z.null(), z.undefined()])
-    .optional(),
-  aktif: z.enum(["0", "1"]).default("1"),
-});
-
-type RegulationFormData = z.infer<typeof regulationSchema>;
+import { type RegulationFormData, regulationSchema } from "../../utils";
 
 const EditRegulation: React.FC = () => {
   const router = useRouter();
   const { id } = useParams();
 
-  // Fetch data regulasi yang akan diedit
   const { data: regulationData, isLoading: isLoadingFetch } =
     useGetSingleRegulationQuery({ id });
 
-  // Mutation untuk update
   const [updateRegulation, { isLoading: isLoadingUpdate, error: errorsAPI }] =
     useUpdateRegulationMutation();
 
@@ -84,7 +71,6 @@ const EditRegulation: React.FC = () => {
     }
   };
 
-  // Loading state
   if (isLoadingFetch) {
     <LoadingSpinner />;
   }
@@ -129,8 +115,13 @@ const EditRegulation: React.FC = () => {
               accept=".pdf,.doc,.docx"
               className="w-full p-2 border border-gray-300 rounded"
             />
-            {RenderFieldError("file", errorsAPI)}
           </div>
+          {errors.file && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.file.message as string}
+            </p>
+          )}
+          {RenderFieldError("file", errorsAPI)}
 
           {/* Tampilkan file existing */}
           {regulationData?.data?.file_url && (

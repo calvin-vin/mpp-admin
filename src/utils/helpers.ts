@@ -167,3 +167,62 @@ export function createMultipleImageValidation(
       }
     );
 }
+
+const ACCEPTED_DOCUMENT_TYPES = [
+  // PDF
+  "application/pdf",
+
+  // Microsoft Office
+  "application/msword", // .doc
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+  "application/vnd.ms-excel", // .xls
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+  "application/vnd.ms-powerpoint", // .ppt
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation", // .pptx
+
+  // OpenOffice
+  "application/vnd.oasis.opendocument.text", // .odt
+  "application/vnd.oasis.opendocument.spreadsheet", // .ods
+  "application/vnd.oasis.opendocument.presentation", // .odp
+];
+
+export function createDocumentValidation(
+  options: {
+    required?: boolean;
+  } = {}
+) {
+  const { required = true } = options;
+
+  // Jika tidak required, izinkan null atau undefined
+  if (!required) {
+    return z.union([
+      z.null(),
+      z.undefined(),
+      z.instanceof(File).refine((file) => {
+        // Jika file ada, lakukan validasi
+        if (!file) return true;
+
+        // Validasi tipe
+        if (!ACCEPTED_DOCUMENT_TYPES.includes(file.type)) {
+          throw new Error(
+            "Tipe dokumen tidak didukung. Gunakan PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, atau dokumen lainnya."
+          );
+        }
+
+        return true;
+      }),
+    ]);
+  }
+
+  // Jika required, gunakan validasi penuh
+  return z
+    .instanceof(File, { message: "File masih kosong" })
+    .refine((file) => {
+      // Pastikan file tidak kosong
+      return file.size > 0;
+    }, "File masih kosong")
+    .refine(
+      (file) => ACCEPTED_DOCUMENT_TYPES.includes(file.type),
+      "Tipe dokumen tidak didukung. Gunakan PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, atau dokumen lainnya."
+    );
+}
