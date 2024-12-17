@@ -1,4 +1,5 @@
 "use client";
+import type { FormData } from "../../utils";
 
 import { BackButton } from "@/app/(components)/BackButton";
 import LoadingSpinner from "@/app/(components)/LoadingSpinner";
@@ -9,36 +10,21 @@ import {
   useGetSingleFacilityQuery,
   useUpdateFacilityMutation,
 } from "@/state/facilitySlice";
-import { createMultipleImageValidation } from "@/utils/helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircle, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import * as z from "zod";
-
-const formSchema = z.object({
-  nama_fasilitas: z
-    .string()
-    .min(2, { message: "Nama fasilitas minimal 2 karakter" }),
-  deskripsi: z.string().min(1, { message: "Deskripsi minimal 1 karakter" }),
-  foto: createMultipleImageValidation(),
-  aktif: z.boolean(),
-});
-
-// Definisi tipe berdasarkan skema
-type FormData = z.infer<typeof formSchema>;
+import { formSchema } from "../../utils";
 
 const EditFacility = () => {
   const router = useRouter();
   const { id } = useParams();
 
-  // Query untuk mengambil data fasilitas
   const { data: facilityData, isLoading: isLoadingFacility } =
     useGetSingleFacilityQuery({ id });
 
-  // Mutation untuk update
   const [updateFacility, { error: errorsAPI }] = useUpdateFacilityMutation();
 
   // State untuk preview foto
@@ -64,7 +50,6 @@ const EditFacility = () => {
   // Watch foto untuk preview
   const fotoFiles = watch("foto");
 
-  // Effect untuk set data awal
   useEffect(() => {
     if (facilityData?.data) {
       const facility = facilityData.data;
@@ -103,7 +88,6 @@ const EditFacility = () => {
 
   const onSubmit = async (formData: FormData) => {
     try {
-      // Buat FormData untuk upload
       const submitData = new FormData();
       submitData.append("id_fasilitas", id as string);
       submitData.append("nama_fasilitas", formData.nama_fasilitas);
@@ -165,7 +149,6 @@ const EditFacility = () => {
     }
   };
 
-  // Loading state
   if (isLoadingFacility) {
     return <LoadingSpinner />;
   }
@@ -198,7 +181,7 @@ const EditFacility = () => {
             {RenderFieldError("nama_fasilitas", errorsAPI)}
           </div>
 
-          {/* Deskripsi dengan TiptapEditor */}
+          {/* Deskripsi TiptapEditor */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Deskripsi Layanan <span className="text-red-500">*</span>

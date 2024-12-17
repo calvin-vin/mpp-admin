@@ -1,30 +1,17 @@
 "use client";
+import type { FormData } from "../utils";
 
 import { BackButton } from "@/app/(components)/BackButton";
 import { RenderFieldError } from "@/app/(components)/RenderFieldError";
 import TiptapEditor from "@/app/(components)/TiptapEditor";
 import { useCreateFacilityMutation } from "@/state/facilitySlice";
-import { createMultipleImageValidation } from "@/utils/helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircle, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import * as z from "zod";
-
-// Skema Validasi Zod
-const formSchema = z.object({
-  nama_fasilitas: z
-    .string()
-    .min(2, { message: "Nama fasilitas minimal 2 karakter" }),
-  deskripsi: z.string().min(1, { message: "Deskripsi minimal 1 karakter" }),
-  foto: createMultipleImageValidation(),
-  aktif: z.boolean(),
-});
-
-// Definisi tipe berdasarkan skema
-type FormData = z.infer<typeof formSchema>;
+import { formSchema } from "../utils";
 
 const AddFacility = () => {
   const router = useRouter();
@@ -75,7 +62,6 @@ const AddFacility = () => {
       submitData.append("deskripsi", formData.deskripsi);
       submitData.append("aktif", formData.aktif ? "1" : "0");
 
-      // Tambahkan foto
       formData.foto.forEach((file, index) => {
         submitData.append(`foto[${index}]`, file);
       });
@@ -84,7 +70,7 @@ const AddFacility = () => {
       await createFacility(submitData).unwrap();
 
       toast.success("Fasilitas berhasil ditambahkan");
-      router.push("/facilities"); // Sesuaikan route
+      router.push("/facilities");
     } catch (error: any) {
       const errorMessage = error.data?.message || "Gagal menambah fasilitas";
       toast.error(errorMessage);
@@ -129,7 +115,7 @@ const AddFacility = () => {
             {RenderFieldError("nama_fasilitas", errorsAPI)}
           </div>
 
-          {/* Input Deskripsi dengan TiptapEditor */}
+          {/* Deskripsi dengan TiptapEditor */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Deskripsi Layanan <span className="text-red-500">*</span>

@@ -88,7 +88,6 @@ const FacilityPage = () => {
           Tambah Fasilitas
         </Link>
       </div>
-      {/* AGENCY LIST */}
       {isLoading ? (
         <div className="flex justify-center items-center min-h-[50vh]">
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary"></div>
@@ -98,10 +97,10 @@ const FacilityPage = () => {
           {facilities?.facilities.map((facility: Facility) => (
             <div
               key={facility.id_fasilitas}
-              className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center transform transition-all hover:scale-105 relative group"
+              className="bg-white rounded-lg shadow-md flex flex-col relative group"
             >
-              {/* Tombol Edit & Delete dengan efek hover */}
-              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex">
+              {/* Absolute positioned edit/delete buttons */}
+              <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex">
                 <Link
                   href={`/facilities/edit/${facility.id_fasilitas}`}
                   className="text-green-500 hover:text-green-700 bg-white/80 rounded-full p-1 shadow-sm"
@@ -112,54 +111,58 @@ const FacilityPage = () => {
 
                 <button
                   onClick={() => handleShowModalDelete(facility.id_fasilitas)}
-                  className="text-red-500 hover:text-red-700 bg-white/80 rounded-full p-1 shadow-sm"
+                  className="text-red-500 hover:text-red-700 bg-white/80 rounded-full p-1 shadow-sm ml-1"
                   aria-label={`Delete ${facility.nama_fasilitas}`}
                 >
                   <Trash2Icon className="w-4 h-4" strokeWidth={1.5} />
                 </button>
               </div>
 
-              {/* Logo Facility */}
-              {facility.foto ? (
-                <div className="w-24 h-24 mb-4 flex items-center justify-center">
+              {/* Image wrapper with fixed height */}
+              <div className="w-full h-48 relative overflow-hidden">
+                {facility.foto ? (
                   <Image
                     src={facility.foto}
                     alt={`Logo ${facility.nama_fasilitas}`}
-                    width={96}
-                    height={96}
-                    className="object-contain"
+                    fill
+                    className="object-cover w-full h-full"
                     priority={false}
                   />
-                </div>
-              ) : (
-                <div className="w-24 h-24 mb-4 flex items-center justify-center bg-gray-100 rounded-full">
-                  <span className="text-gray-500">No Logo</span>
-                </div>
-              )}
-
-              <h3 className="text-xl font-bold text-gray-800 mb-3 text-center">
-                {facility.nama_fasilitas}
-              </h3>
-
-              <div className="flex items-center mb-3">
-                <span
-                  className={`px-2 py-1 rounded-full text-xs ${
-                    facility.aktif == "1"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  {facility.aktif == "1" ? "Aktif" : "Tidak Aktif"}
-                </span>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <span className="text-gray-500">No Logo</span>
+                  </div>
+                )}
               </div>
 
-              <Link
-                href={`/facilities/edit/${facility.id_fasilitas}`}
-                className="w-full flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 font-semibold py-2 px-4 rounded-lg transition-colors"
-              >
-                <EyeIcon className="w-5 h-5 mr-2" />
-                Lihat Detail
-              </Link>
+              {/* Content section */}
+              <div className="p-4 flex flex-col flex-grow">
+                <h3 className="text-xl font-bold text-gray-800 mb-3 text-center">
+                  {facility.nama_fasilitas}
+                </h3>
+
+                <div className="flex justify-center mb-3">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs ${
+                      facility.aktif == "1"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {facility.aktif == "1" ? "Aktif" : "Tidak Aktif"}
+                  </span>
+                </div>
+
+                <div className="mt-auto">
+                  <Link
+                    href={`/facilities/edit/${facility.id_fasilitas}`}
+                    className="w-full flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 font-semibold py-2 px-4 rounded-lg transition-colors"
+                  >
+                    <EyeIcon className="w-5 h-5 mr-2" />
+                    Lihat Detail
+                  </Link>
+                </div>
+              </div>
             </div>
           ))}
         </div>
