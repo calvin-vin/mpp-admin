@@ -13,14 +13,18 @@ export const useMenus = () => {
   // Fetch menu data
   useEffect(() => {
     const fetchMenuData = async () => {
+      setIsLoading(true);
+
       try {
-        setIsLoading(true);
+        const token = localStorage.getItem("token");
+        const userString = localStorage.getItem("user");
+        const user = JSON.parse(userString);
+
         const response = await axios.get(`${API_HOST}/menu/list`, {
           headers: {
             Accept: "application/json",
-            "X-Key": "999999999",
-            Token:
-              "bWkDHQLFtWlGy77KeS0qqq7i6pwdhpCgGhHtrggARhIS6aNyfyviLwkUTsR1v7Jo",
+            "X-Key": user.nip,
+            Token: token,
           },
         });
 

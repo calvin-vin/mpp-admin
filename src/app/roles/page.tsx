@@ -2,7 +2,6 @@
 
 import Header from "@/app/(components)/Header";
 import ModalDelete from "@/app/(components)/ModalDelete";
-import useDebounce from "@/hooks/useDebounce";
 import { useDeleteRoleMutation, useGetRolesQuery } from "@/state/roleSlice";
 import { DATA_PER_PAGE } from "@/utils/constants";
 import {
@@ -10,7 +9,6 @@ import {
   EditIcon,
   LoaderCircleIcon,
   PlusCircle,
-  SearchIcon,
   TrashIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -18,10 +16,8 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import Datatable from "../(components)/Datatable";
 import ErrorDisplay from "../(components)/ErrorDisplay";
-import { DataGrid } from "@mui/x-data-grid";
 
 const Role = () => {
-  const [search, setSearch] = useState("");
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: DATA_PER_PAGE,

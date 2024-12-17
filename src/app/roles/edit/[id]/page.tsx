@@ -1,30 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import Select from "react-select";
-import toast from "react-hot-toast";
-import { useParams, useRouter } from "next/navigation";
+import type { RoleFormData } from "../../utils";
+
 import { BackButton } from "@/app/(components)/BackButton";
 import LoadingSpinner from "@/app/(components)/LoadingSpinner";
+import { RenderFieldError } from "@/app/(components)/RenderFieldError";
 import { useMenus } from "@/hooks/useMenus";
 import {
   useGetSingleRoleQuery,
   useUpdateRoleMutation,
 } from "@/state/roleSlice";
-import { RenderFieldError } from "@/app/(components)/RenderFieldError";
-
-const roleSchema = z.object({
-  nama: z.string().min(3, { message: "Nama role minimal 3 karakter" }),
-  menu: z.array(z.string()).min(1, { message: "Pilih minimal satu menu" }),
-  status: z.enum(["ACTIVE", "INACTIVE"], {
-    errorMap: () => ({ message: "Status harus ACTIVE atau INACTIVE" }),
-  }),
-});
-
-type RoleFormData = z.infer<typeof roleSchema>;
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import Select from "react-select";
+import { roleSchema } from "../../utils";
+import ErrorDisplay from "@/app/(components)/ErrorDisplay";
+import { Edit } from "lucide-react";
 
 const EditRole = () => {
   const router = useRouter();
@@ -35,12 +29,11 @@ const EditRole = () => {
     data: roleData,
     isLoading: isLoadingRole,
     error: errorFetchRole,
+    refetch: refetchRole,
   } = useGetSingleRoleQuery({ id });
 
-  // Mutation untuk update role
   const [updateRole, { error: errorsAPI }] = useUpdateRoleMutation();
 
-  // Hook form
   const {
     register,
     control,
@@ -55,7 +48,6 @@ const EditRole = () => {
     },
   });
 
-  // Isi form dengan data role saat data tersedia
   useEffect(() => {
     if (roleData?.data) {
       const role = roleData.data;
@@ -67,7 +59,6 @@ const EditRole = () => {
     }
   }, [roleData, reset]);
 
-  // Handler submit
   const onSubmit = async (data: RoleFormData) => {
     try {
       await updateRole({
@@ -83,25 +74,23 @@ const EditRole = () => {
     }
   };
 
-  // Loading state
   if (isLoadingGetMenu || isLoadingRole) {
     return <LoadingSpinner />;
   }
 
-  // Error state
   if (errorFetchRole) {
     return (
-      <div className="container mx-auto p-6 text-red-500">
-        Gagal memuat data role
-      </div>
+      <ErrorDisplay
+        callback={() => {
+          refetchRole();
+        }}
+      />
     );
   }
 
   return (
     <>
-      <div className="container px-6">
-        <BackButton />
-      </div>
+      <BackButton />
       <div className="container mx-auto p-6 bg-white rounded-lg">
         <h1 className="text-2xl font-bold mb-6">Edit Role</h1>
 
@@ -109,7 +98,7 @@ const EditRole = () => {
           {/* Input Nama Role */}
           <div>
             <label htmlFor="nama" className="block mb-2">
-              Nama Role
+              Nama Role <span className="text-red-500">*</span>
             </label>
             <input
               {...register("nama")}
@@ -124,7 +113,9 @@ const EditRole = () => {
 
           {/* Multi-Select Menu */}
           <div>
-            <label className="block mb-2">Pilih Menu</label>
+            <label className="block mb-2">
+              Pilih Menu <span className="text-red-500">*</span>
+            </label>
             <Controller
               name="menu"
               control={control}
@@ -158,7 +149,7 @@ const EditRole = () => {
           {/* Status Role */}
           <div>
             <label htmlFor="status" className="block mb-2">
-              Status
+              Status <span className="text-red-500">*</span>
             </label>
             <select
               {...register("status")}
@@ -180,11 +171,12 @@ const EditRole = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-primary text-white py-2 rounded 
-            hover:bg-primary-dark transition-colors 
-            disabled:opacity-50"
+              className="w-full flex justify-center items-center bg-primary text-white font-semibold py-2 px-4 rounded 
+            hover:bg-primary-dark transition-colors duration-300 
+            disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Menyimpan..." : "Perbarui Role"}
+              <Edit className="w-5 h-5 mr-2" />
+              {isSubmitting ? "Memperbarui..." : "Perbarui Role"}
             </button>
           </div>
         </form>

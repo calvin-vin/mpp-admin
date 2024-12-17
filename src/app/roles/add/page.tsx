@@ -1,35 +1,22 @@
 "use client";
+import type { RoleFormData } from "../utils";
 
-import { useState, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import Select from "react-select";
-import toast from "react-hot-toast";
-import axios from "axios"; // Pastikan mengimpor axios
-import { API_HOST } from "@/utils/constants"; // Sesuaikan path import
 import { BackButton } from "@/app/(components)/BackButton";
 import LoadingSpinner from "@/app/(components)/LoadingSpinner";
-import { useMenus } from "@/hooks/useMenus";
-import { useRouter } from "next/navigation";
-import { useCreateRoleMutation } from "@/state/roleSlice";
 import { RenderFieldError } from "@/app/(components)/RenderFieldError";
-
-// Definisi skema validasi
-const roleSchema = z.object({
-  nama: z.string().min(3, { message: "Nama role minimal 3 karakter" }),
-  menu: z.array(z.string()).min(1, { message: "Pilih minimal satu menu" }),
-  status: z.enum(["ACTIVE", "INACTIVE"], {
-    errorMap: () => ({ message: "Status harus ACTIVE atau INACTIVE" }),
-  }),
-});
-
-// Tipe untuk form data
-type RoleFormData = z.infer<typeof roleSchema>;
+import { useMenus } from "@/hooks/useMenus";
+import { useCreateRoleMutation } from "@/state/roleSlice";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { Controller, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import Select from "react-select";
+import { roleSchema } from "../utils";
+import { PlusCircle } from "lucide-react";
 
 const AddRole = () => {
   const router = useRouter();
-  const { menuOptions, isLoading: isLoadingGetMenu, error } = useMenus();
+  const { menuOptions, isLoading: isLoadingGetMenu } = useMenus();
   const [createRole, { error: errorsAPI }] = useCreateRoleMutation();
 
   // Hook form
@@ -38,7 +25,6 @@ const AddRole = () => {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
   } = useForm<RoleFormData>({
     resolver: zodResolver(roleSchema),
     defaultValues: {
@@ -66,9 +52,7 @@ const AddRole = () => {
 
   return (
     <>
-      <div className="container px-6">
-        <BackButton />
-      </div>
+      <BackButton />
       <div className="container mx-auto p-6 bg-white rounded-lg">
         <h1 className="text-2xl font-bold mb-6">Tambah Role Baru</h1>
 
@@ -76,7 +60,7 @@ const AddRole = () => {
           {/* Input Nama Role */}
           <div>
             <label htmlFor="nama" className="block mb-2">
-              Nama Role
+              Nama Role <span className="text-red-500">*</span>
             </label>
             <input
               {...register("nama")}
@@ -91,7 +75,9 @@ const AddRole = () => {
 
           {/* Multi-Select Menu */}
           <div>
-            <label className="block mb-2">Pilih Menu</label>
+            <label className="block mb-2">
+              Pilih Menu <span className="text-red-500">*</span>
+            </label>
             <Controller
               name="menu"
               control={control}
@@ -125,7 +111,7 @@ const AddRole = () => {
           {/* Status Role */}
           <div>
             <label htmlFor="status" className="block mb-2">
-              Status
+              Status <span className="text-red-500">*</span>
             </label>
             <select
               {...register("status")}
@@ -147,11 +133,12 @@ const AddRole = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-primary text-white py-2 rounded 
-            hover:bg-primary-dark transition-colors 
-            disabled:opacity-50"
+              className="w-full flex justify-center items-center bg-primary text-white font-semibold py-2 px-4 rounded 
+            hover:bg-primary-dark transition-colors duration-300 
+            disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Menyimpan..." : "Simpan Role"}
+              <PlusCircle className="w-5 h-5 mr-2" />
+              {isSubmitting ? "Menambahkan..." : "Tambah Role"}
             </button>
           </div>
         </form>
