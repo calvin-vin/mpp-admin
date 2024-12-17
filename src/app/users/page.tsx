@@ -94,13 +94,29 @@ const User = () => {
       headerAlign: "center",
     },
     {
-      field: "nip",
-      headerName: "NIP",
+      field: "nama_instansi",
+      headerName: "Instansi",
       minWidth: 150,
       flex: 1,
       sortable: false,
       align: "center",
       headerAlign: "center",
+      renderCell: (params: any) => {
+        const namaInstansi = params.row.nama_instansi;
+
+        return (
+          <div className="flex flex-col items-center justify-center text-center w-full">
+            <span
+              className="text-gray-600 leading-tight 
+              max-w-full break-words overflow-hidden 
+              whitespace-normal line-clamp-2"
+              title={namaInstansi}
+            >
+              {namaInstansi}
+            </span>
+          </div>
+        );
+      },
     },
     {
       field: "mobile",

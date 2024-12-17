@@ -1,5 +1,7 @@
 "use client";
 
+import type { FormData } from "../../utils";
+
 import { BackButton } from "@/app/(components)/BackButton";
 import ErrorDisplay from "@/app/(components)/ErrorDisplay";
 import LoadingSpinner from "@/app/(components)/LoadingSpinner";
@@ -15,21 +17,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import * as z from "zod";
-
-// Skema Validasi Zod (bisa disesuaikan)
-const formSchema = z.object({
-  nip: z.string().min(2, { message: "NIP minimal 2 karakter" }),
-  nama_lengkap: z
-    .string()
-    .min(2, { message: "Nama lengkap minimal 2 karakter" }),
-  email: z.string().email({ message: "Email tidak valid" }),
-  mobile: z.string().min(8, { message: "Nomor HP minimal 8 karakter" }),
-  status: z.enum(["ACTIVE", "INACTIVE"], { message: "Status harus dipilih" }),
-  id_role: z.string().min(1, { message: "Role harus dipilih" }),
-});
-
-type FormData = z.infer<typeof formSchema>;
+import { formSchema } from "../../utils";
+import useAgencies from "@/hooks/useAgencies";
 
 const EditUser = () => {
   const router = useRouter();
@@ -41,7 +30,13 @@ const EditUser = () => {
     refetch: refetchRoles,
   } = useRoles();
 
-  // Query untuk mendapatkan data user
+  const {
+    agencyList,
+    isLoading: isLoadingAgency,
+    error: agencyError,
+    refetch: refetchAgency,
+  } = useAgencies();
+
   const {
     data: userData,
     isLoading: isLoadingUser,
@@ -51,7 +46,6 @@ const EditUser = () => {
     id,
   });
 
-  // Mutation untuk update user
   const [updateUser, { error: errorsAPI }] = useUpdateUserMutation();
 
   const {
@@ -63,7 +57,6 @@ const EditUser = () => {
     resolver: zodResolver(formSchema),
   });
 
-  // Populate form saat data user didapatkan
   useEffect(() => {
     if (userData?.data) {
       const user = userData.data;
@@ -74,6 +67,7 @@ const EditUser = () => {
         mobile: user.mobile,
         status: user.status,
         id_role: user.id_role,
+        id_instansi: user.id_instansi,
       });
     }
   }, [userData, reset]);
@@ -82,7 +76,6 @@ const EditUser = () => {
     try {
       const submitData = new FormData();
 
-      // Tambahkan semua field dari form
       submitData.append("id", id as string);
       submitData.append("nip", formData.nip);
       submitData.append("nama_lengkap", formData.nama_lengkap);
@@ -90,11 +83,10 @@ const EditUser = () => {
       submitData.append("mobile", formData.mobile);
       submitData.append("status", formData.status);
       submitData.append("id_role", formData.id_role.toString());
+      submitData.append("id_instansi", formData.id_instansi.toString());
 
-      // Tambahkan ID untuk update
       submitData.append("id", id as string);
 
-      // Gunakan unwrap() untuk mendapatkan error yang lebih detail
       await updateUser(submitData).unwrap();
 
       toast.success("User berhasil diperbarui");
@@ -117,16 +109,27 @@ const EditUser = () => {
     [roleList]
   );
 
-  if (roleError || userError) {
+  const agencyMenuItems = useMemo(
+    () =>
+      agencyList.map((agency) => (
+        <option key={agency.value} value={agency.value.toString()}>
+          {agency.label}
+        </option>
+      )),
+    [agencyList]
+  );
+
+  if (roleError || userError || agencyError) {
     <ErrorDisplay
       callback={() => {
         refetchRoles();
         refetchUser();
+        refetchAgency();
       }}
     />;
   }
 
-  if (isLoadingUser || isLoadingRoles) {
+  if (isLoadingUser || isLoadingRoles || isLoadingAgency) {
     return <LoadingSpinner />;
   }
 
@@ -232,6 +235,26 @@ const EditUser = () => {
               </p>
             )}
             {RenderFieldError("id_role", errorsAPI)}
+          </div>
+
+          {/* Instansi */}
+          <div>
+            <label className="block mb-2 font-medium">
+              Instansi <span className="text-red-500">*</span>
+            </label>
+            <select
+              {...register("id_instansi")}
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">Pilih Instansi</option>
+              {agencyMenuItems}
+            </select>
+            {errors.id_instansi && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.id_instansi.message}
+              </p>
+            )}
+            {RenderFieldError("id_instansi", errorsAPI)}
           </div>
 
           {/* Status */}

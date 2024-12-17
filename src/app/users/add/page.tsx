@@ -1,9 +1,12 @@
 "use client";
 
+import type { FormData } from "../utils";
+
 import { BackButton } from "@/app/(components)/BackButton";
 import ErrorDisplay from "@/app/(components)/ErrorDisplay";
 import LoadingSpinner from "@/app/(components)/LoadingSpinner";
 import { RenderFieldError } from "@/app/(components)/RenderFieldError";
+import useAgencies from "@/hooks/useAgencies";
 import useRoles from "@/hooks/useRoles";
 import { useCreateUserMutation } from "@/state/userSlice";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,26 +15,22 @@ import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import * as z from "zod";
-
-// Skema Validasi Zod
-const formSchema = z.object({
-  nip: z.string().min(2, { message: "NIP minimal 2 karakter" }),
-  nama_lengkap: z
-    .string()
-    .min(2, { message: "Nama lengkap minimal 2 karakter" }),
-  email: z.string().email({ message: "Email tidak valid" }),
-  mobile: z.string().min(8, { message: "Nomor HP minimal 8 karakter" }),
-  status: z.enum(["ACTIVE", "INACTIVE"], { message: "Status harus dipilih" }),
-  id_role: z.string().min(1, { message: "Role harus dipilih" }),
-});
-
-// Definisi tipe berdasarkan skema
-type FormData = z.infer<typeof formSchema>;
+import { formSchema } from "../utils";
 
 const AddUser = () => {
   const router = useRouter();
-  const { roleList, isLoading, error, refetch } = useRoles();
+  const {
+    roleList,
+    isLoading: roleLoading,
+    error: roleError,
+    refetch: refetchRole,
+  } = useRoles();
+  const {
+    agencyList,
+    isLoading: agencyLoading,
+    error: agencyError,
+    refetch: refetchAgency,
+  } = useAgencies();
   const [createUser, { error: errorsAPI }] = useCreateUserMutation();
 
   const {
@@ -49,15 +48,14 @@ const AddUser = () => {
     try {
       const submitData = new FormData();
 
-      // Tambahkan semua field dari form
       submitData.append("nip", formData.nip);
       submitData.append("nama_lengkap", formData.nama_lengkap);
       submitData.append("email", formData.email);
       submitData.append("mobile", formData.mobile);
       submitData.append("status", formData.status);
       submitData.append("id_role", formData.id_role.toString());
+      submitData.append("id_instansi", formData.id_instansi.toString());
 
-      // Gunakan unwrap() untuk mendapatkan error yang lebih detail
       await createUser(submitData).unwrap();
 
       toast.success("User berhasil ditambahkan");
@@ -80,8 +78,26 @@ const AddUser = () => {
     [roleList]
   );
 
-  if (isLoading) return <LoadingSpinner />;
-  if (error) return <ErrorDisplay callback={refetch} />;
+  const agencyMenuItems = useMemo(
+    () =>
+      agencyList.map((agency) => (
+        <option key={agency.value} value={agency.value.toString()}>
+          {agency.label}
+        </option>
+      )),
+    [agencyList]
+  );
+
+  if (roleLoading || agencyLoading) return <LoadingSpinner />;
+  if (roleError || agencyError)
+    return (
+      <ErrorDisplay
+        callback={() => {
+          refetchRole();
+          refetchAgency();
+        }}
+      />
+    );
 
   return (
     <>
@@ -183,6 +199,26 @@ const AddUser = () => {
               </p>
             )}
             {RenderFieldError("id_role", errorsAPI)}
+          </div>
+
+          {/* Instansi */}
+          <div>
+            <label className="block mb-2 font-medium">
+              Instansi <span className="text-red-500">*</span>
+            </label>
+            <select
+              {...register("id_instansi")}
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">Pilih Instansi</option>
+              {agencyMenuItems}
+            </select>
+            {errors.id_instansi && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.id_instansi.message}
+              </p>
+            )}
+            {RenderFieldError("id_instansi", errorsAPI)}
           </div>
 
           {/* Status */}

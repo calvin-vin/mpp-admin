@@ -3,29 +3,27 @@
 import type { Queue } from "@/state/queueSlice";
 
 import Header from "@/app/(components)/Header";
+import ModalDelete from "@/app/(components)/ModalDelete";
 import useDebounce from "@/hooks/useDebounce";
 import { usePusherSubscription } from "@/hooks/usePusherSubscription";
 import { useDeleteQueueMutation, useGetQueuesQuery } from "@/state/queueSlice";
 import { DATA_PER_PAGE } from "@/utils/constants";
+import { formattedDate } from "@/utils/helpers";
 import {
   AlertCircleIcon,
-  CircleCheck,
   CircleCheckIcon,
   ClockIcon,
   EditIcon,
-  LoaderCircleIcon,
   PlusCircle,
   TrashIcon,
   UserCheckIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import Datatable from "../(components)/Datatable";
 import ErrorDisplay from "../(components)/ErrorDisplay";
 import QueueFilter from "./QueueFilter";
-import { formattedDate, formattedTime } from "@/utils/helpers";
-import ModalDelete from "@/app/(components)/ModalDelete";
-import toast from "react-hot-toast";
-import Link from "next/link";
 
 // Definisikan tipe DateRange dan FilterState seperti di QueueFilter
 interface DateRange {
