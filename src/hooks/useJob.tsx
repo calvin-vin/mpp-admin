@@ -29,12 +29,12 @@ export const useJob = () => {
 
         // Pastikan struktur response sesuai
         if (response.data && Array.isArray(response.data.data)) {
-          const data = response.data.data.map(
-            (job: { id: number; pekerjaan: string }) => ({
+          const data = response.data.data
+            .map((job: { id: number; pekerjaan: string }) => ({
               value: job.id, // Gunakan ID sebagai value
               label: job.pekerjaan, // Pekerjaan sebagai label
-            })
-          );
+            }))
+            .sort((a: any, b: any) => a.label.localeCompare(b.label));
 
           setJobs(data);
         } else {

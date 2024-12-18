@@ -38,6 +38,7 @@ interface GetQueuesParams {
   search?: string;
   status?: string;
   service?: string;
+  agency?: string;
   dateRange?: {
     from?: string;
     to?: string;
@@ -52,22 +53,25 @@ export const queueSlice = apiSlice.injectEndpoints({
       { queues: Queue[]; pagination: PaginationMeta },
       GetQueuesParams
     >({
-      query: (params = {}) => ({
-        url: "/antrian/list",
-        params: {
-          keyword: params.search ?? "",
-          is_attend: params.status ?? "",
-          service: params.service ?? "",
-          start_date: params.dateRange?.from
-            ? format(params.dateRange.from, "yyyy-MM-dd")
-            : "",
-          end_date: params.dateRange?.to
-            ? format(params.dateRange.to, "yyyy-MM-dd")
-            : "",
-          page: params.page ?? 1,
-          per_page: params.perPage ?? 10,
-        },
-      }),
+      query: (params = {}) => {
+        return {
+          url: "/antrian/list",
+          params: {
+            keyword: params.search ?? "",
+            is_attend: params.status ?? "",
+            id_layanan: params.service ?? "",
+            id_instansi: params.agency ?? "",
+            start_date: params.dateRange?.from
+              ? format(params.dateRange.from, "yyyy-MM-dd")
+              : "",
+            end_date: params.dateRange?.to
+              ? format(params.dateRange.to, "yyyy-MM-dd")
+              : "",
+            page: params.page ?? 1,
+            per_page: params.perPage ?? 10,
+          },
+        };
+      },
       transformResponse: (response: QueueApiResponse) => {
         const transformedQueues = response.data.map((item) => ({
           ...item,

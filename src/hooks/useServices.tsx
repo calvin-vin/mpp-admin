@@ -24,10 +24,12 @@ export const useServices = () => {
   const serviceList = useMemo<ServiceOption[]>(() => {
     if (!servicesData?.services) return [];
 
-    return servicesData.services.map((service) => ({
-      value: service.id_layanan, // Gunakan ID sebagai value
-      label: service.layanan, // Nama layanan sebagai label
-    }));
+    return servicesData.services
+      .map((service) => ({
+        value: service.id_layanan, // Gunakan ID sebagai value
+        label: service.layanan, // Nama layanan sebagai label
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
   }, [servicesData]);
 
   // Fungsi untuk mendapatkan opsi layanan spesifik

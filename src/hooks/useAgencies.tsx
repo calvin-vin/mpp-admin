@@ -17,14 +17,15 @@ export const useAgencies = () => {
     perPage: 999,
   });
 
-  // Transform data agency menjadi opsi untuk dropdown/select
   const agencyList = useMemo<AgencyOption[]>(() => {
     if (!agenciesData?.agencies) return [];
 
-    return agenciesData.agencies.map((agency) => ({
-      value: agency.id_instansi,
-      label: agency.instansi,
-    }));
+    return agenciesData.agencies
+      .map((agency) => ({
+        value: agency.id_instansi,
+        label: agency.instansi,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
   }, [agenciesData]);
 
   // Fungsi untuk mendapatkan opsi agency spesifik

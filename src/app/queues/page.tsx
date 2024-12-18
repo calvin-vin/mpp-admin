@@ -9,20 +9,13 @@ import { usePusherSubscription } from "@/hooks/usePusherSubscription";
 import { useDeleteQueueMutation, useGetQueuesQuery } from "@/state/queueSlice";
 import { DATA_PER_PAGE } from "@/utils/constants";
 import { formattedDate } from "@/utils/helpers";
-import {
-  AlertCircleIcon,
-  CircleCheckIcon,
-  ClockIcon,
-  EditIcon,
-  PlusCircle,
-  TrashIcon,
-  UserCheckIcon,
-} from "lucide-react";
+import { EditIcon, PlusCircle, TrashIcon } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Datatable from "../(components)/Datatable";
 import ErrorDisplay from "../(components)/ErrorDisplay";
+import ChangeStatus from "./ChangeStatus";
 import QueueFilter from "./QueueFilter";
 
 // Definisikan tipe DateRange dan FilterState seperti di QueueFilter
@@ -33,8 +26,8 @@ interface DateRange {
 
 interface FilterState {
   search: string;
-  status: string;
   service: string;
+  agency: string;
   dateRange: DateRange;
 }
 
@@ -52,8 +45,8 @@ const Queue = () => {
   // State untuk filter
   const [filters, setFilters] = useState<FilterState>({
     search: "",
-    status: "",
     service: "",
+    agency: "",
     dateRange: {
       from: null,
       to: null,
@@ -80,8 +73,8 @@ const Queue = () => {
   const resetFilters = useCallback(() => {
     setFilters({
       search: "",
-      status: "",
       service: "",
+      agency: "",
       dateRange: {
         from: null,
         to: null,
@@ -103,8 +96,8 @@ const Queue = () => {
     refetch,
   } = useGetQueuesQuery({
     search: filters.search,
-    status: filters.status,
     service: filters.service,
+    agency: filters.agency,
     dateRange: {
       from: formatDateToISOString(filters.dateRange.from),
       to: formatDateToISOString(filters.dateRange.to),
@@ -209,15 +202,15 @@ const Queue = () => {
         return (
           <div className="flex flex-col items-center justify-center text-center w-full">
             <span
-              className="text-sm font-medium leading-tight 
+              className="text-sm font-medium leading-tight
               max-w-full truncate block"
               title={namaLayanan}
             >
               {namaLayanan}
             </span>
             <span
-              className="text-xs text-gray-600 leading-tight 
-              max-w-full break-words overflow-hidden 
+              className="text-xs text-gray-600 leading-tight
+              max-w-full break-words overflow-hidden
               whitespace-normal line-clamp-2"
               title={namaInstansi}
             >
@@ -236,52 +229,7 @@ const Queue = () => {
       align: "center",
       headerAlign: "center",
       renderCell: (params: any) => {
-        const status = params.row.status?.toUpperCase();
-
-        const statusConfig = {
-          BOOKED: {
-            color: "bg-blue-600",
-            icon: <ClockIcon size={18} />,
-            label: "Booked",
-          },
-          PRESENT: {
-            color: "bg-yellow-600",
-            icon: <UserCheckIcon size={18} />,
-            label: "Proses",
-          },
-          FINISH: {
-            color: "bg-green-600",
-            icon: <CircleCheckIcon size={18} />,
-            label: "Selesai",
-          },
-          DEFAULT: {
-            color: "bg-gray-500",
-            icon: <AlertCircleIcon size={18} />,
-            label: "Status Tidak Dikenal",
-          },
-        };
-
-        const statusData =
-          statusConfig[status as keyof typeof statusConfig] ||
-          statusConfig.DEFAULT;
-
-        return (
-          <span
-            className={`
-              inline-flex items-center 
-              px-4 py-1.5 
-              text-sm font-medium 
-              text-center text-white 
-              rounded-full 
-              ${statusData.color} 
-              my-2 
-              gap-2
-            `}
-          >
-            {statusData.icon}
-            <p>{statusData.label}</p>
-          </span>
-        );
+        return <ChangeStatus params={params} />;
       },
     },
     {
@@ -367,24 +315,22 @@ const Queue = () => {
           </Link>
         </div>
 
-        <div style={{ width: "100%" }}>
-          <Datatable
-            totalCount={totalCount}
-            paginationModel={paginationModel}
-            handlePaginationModelChange={handlePaginationModelChange}
-            loading={isLoading || !queues}
-            rows={
-              (queues &&
-                queues.map((item, index) => ({
-                  "No.":
-                    paginationModel.page * paginationModel.pageSize + index + 1,
-                  ...item,
-                }))) ||
-              []
-            }
-            columns={columns}
-          />
-        </div>
+        <Datatable
+          totalCount={totalCount}
+          paginationModel={paginationModel}
+          handlePaginationModelChange={handlePaginationModelChange}
+          loading={isLoading || !queues}
+          rows={
+            (queues &&
+              queues.map((item, index) => ({
+                "No.":
+                  paginationModel.page * paginationModel.pageSize + index + 1,
+                ...item,
+              }))) ||
+            []
+          }
+          columns={columns}
+        />
       </div>
 
       <ModalDelete

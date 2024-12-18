@@ -11,6 +11,7 @@ import { useCallback, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import ErrorDisplay from "../(components)/ErrorDisplay";
 import LoadingSpinner from "../(components)/LoadingSpinner";
+import useAgencies from "@/hooks/useAgencies";
 
 // Definisikan tipe DateRange yang lebih fleksibel
 interface DateRange {
@@ -21,8 +22,8 @@ interface DateRange {
 // Perbarui tipe filter
 interface FilterState {
   search: string;
-  status: string;
   service: string;
+  agency: string;
   dateRange: DateRange;
 }
 
@@ -42,9 +43,19 @@ const QueueFilter = ({
   searchTerm,
   setSearchTerm,
 }: FilterProps) => {
-  const { serviceList, isLoading, error, refetch } = useServices();
+  const {
+    serviceList,
+    isLoading: isLoadingService,
+    error: errorService,
+    refetch: refetchService,
+  } = useServices();
+  const {
+    agencyList,
+    isLoading: isLoadingAgency,
+    error: errorAgency,
+    refetch: refetchAgency,
+  } = useAgencies();
 
-  // Memoize service menu items
   const serviceMenuItems = useMemo(
     () =>
       serviceList.map((opt) => (
@@ -55,6 +66,16 @@ const QueueFilter = ({
     [serviceList]
   );
 
+  const agencyMenuItems = useMemo(
+    () =>
+      agencyList.map((opt) => (
+        <MenuItem key={opt.value} value={opt.value.toString()}>
+          {opt.label}
+        </MenuItem>
+      )),
+    [agencyList]
+  );
+
   // Handler untuk update filter
   const handleFilterChange = useCallback(
     (key: keyof FilterProps["filters"], value: string | DateRange) => {
@@ -63,8 +84,16 @@ const QueueFilter = ({
     [updateFilters]
   );
 
-  if (isLoading) return <LoadingSpinner />;
-  if (error) return <ErrorDisplay callback={refetch} />;
+  if (isLoadingService || isLoadingAgency) return <LoadingSpinner />;
+  if (errorAgency || errorService)
+    return (
+      <ErrorDisplay
+        callback={() => {
+          refetchAgency();
+          refetchService();
+        }}
+      />
+    );
 
   return (
     <div className="space-y-4 mb-8">
@@ -83,18 +112,17 @@ const QueueFilter = ({
 
       {/* Filter Container */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* Filter Status */}
+        {/* Filter Instansi */}
         <div>
           <FormControl fullWidth variant="outlined">
-            <InputLabel id="status-select-label">Status</InputLabel>
+            <InputLabel id="agency-select-label">Instansi</InputLabel>
             <Select
-              labelId="status-select-label"
-              value={filters.status || ""}
-              onChange={(e) => handleFilterChange("status", e.target.value)}
-              label="Status"
+              labelId="agency-select-label"
+              value={filters.agency || ""}
+              onChange={(e) => handleFilterChange("agency", e.target.value)}
+              label="Instansi"
             >
-              <MenuItem value="0">Dalam Proses</MenuItem>
-              <MenuItem value="1">Selesai</MenuItem>
+              {agencyMenuItems}
             </Select>
           </FormControl>
         </div>
