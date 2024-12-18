@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build:force": "set TYPESCRIPT_IGNORE_BUILD_ERRORS=true && next build",
+    "build:force": "set TYPESCRIPT_IGNORE_BUILD_ERRORS=true && next build --no-lint",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
