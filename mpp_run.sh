@@ -9,7 +9,7 @@ liveServer() {
     echo "Built MPP ADMIN image..."
     docker build -t mpp_admin:latest .
 
-    echo "Starting MPP ADMIN..."
+    echo "Starting MPP ADMIN...."
     # docker run -d -p 3000:3002 mpp_admin:latest
     docker run -d --network app_skpnetwork -p 8080:3000 --name mpp_admin_container mpp_admin:latest
 }
