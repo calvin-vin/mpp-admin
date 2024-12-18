@@ -31,9 +31,8 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const Setting = () => {
-  const { data: settingData, isLoading: isLoadingSetting } = useGetSettingQuery(
-    {}
-  );
+  const { data: settingData, isLoading: isLoadingSetting } =
+    useGetSettingQuery();
   const [updateSetting, { error: errorsAPI }] = useUpdateSettingMutation();
 
   const {
@@ -51,15 +50,15 @@ const Setting = () => {
   const logoFile = watch("logo");
 
   useEffect(() => {
-    if (settingData?.data) {
+    if (settingData) {
       reset({
-        nama_aplikasi: settingData.data.nama_aplikasi,
-        instagram: settingData.data.instagram,
-        youtube: settingData.data.youtube,
-        facebook: settingData.data.facebook,
-        whatsapp: settingData.data.whatsapp,
-        footer: settingData.data.footer,
-        versi: settingData.data.versi,
+        nama_aplikasi: settingData.nama_aplikasi,
+        instagram: settingData.instagram,
+        youtube: settingData.youtube,
+        facebook: settingData.facebook,
+        whatsapp: settingData.whatsapp,
+        footer: settingData.footer,
+        versi: settingData.versi,
       });
     }
   }, [settingData, reset]);
@@ -85,7 +84,7 @@ const Setting = () => {
         whatsapp: formData.whatsapp,
         footer: formData.footer,
         versi: formData.versi,
-        tgl: settingData.data.tgl,
+        tgl: settingData.tgl,
       }).forEach(([key, value]) => submitData.append(key, value));
 
       if (formData.logo) {
@@ -252,10 +251,10 @@ const Setting = () => {
             )}
 
             {/* Tampilkan logo lama jika ada */}
-            {settingData?.data?.logo && !logoFile && (
+            {settingData?.logo && !logoFile && (
               <div className="mt-2">
                 <img
-                  src={settingData.data.logo}
+                  src={settingData.logo}
                   alt="Logo Instansi"
                   width={200}
                   height={200}

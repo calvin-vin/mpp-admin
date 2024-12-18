@@ -22,9 +22,10 @@ import {
   REGISTER,
   REHYDRATE,
 } from "redux-persist";
+import { PersistPartial } from "redux-persist/es/persistReducer";
 import { PersistGate } from "redux-persist/integration/react";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
-import { PersistPartial } from "redux-persist/es/persistReducer";
+import settingReducer from "@/state/settingSlice";
 
 /* REDUX PERSISTENCE */
 const createNoopStorage = () => {
@@ -49,11 +50,12 @@ const storage =
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["global", "auth"],
+  whitelist: ["global", "auth", "setting"],
 };
 const rootReducer = combineReducers({
   global: globalReducer,
   auth: authReducer,
+  setting: settingReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
 });
 const persistedReducer = persistReducer(persistConfig, rootReducer);

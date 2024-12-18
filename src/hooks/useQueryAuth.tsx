@@ -1,9 +1,12 @@
 // src/hooks/useQueryAuth.ts
+import { setCredentials, useLoginMutation } from "@/state/authSlice";
+import { setSetting } from "@/state/settingSlice"; // Gunakan hook dari RTK Query
+import { BASE_API_URL, HOST_PORTAL } from "@/utils/constants";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { redirect, useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
-import { useLoginMutation, setCredentials } from "@/state/authSlice";
-import { HOST_PORTAL } from "@/utils/constants";
 
 export const useQueryAuth = () => {
   const router = useRouter();
@@ -13,30 +16,35 @@ export const useQueryAuth = () => {
   useEffect(() => {
     const processQueryAuth = async () => {
       try {
-        // Ambil query parameter
         const searchParams = new URLSearchParams(window.location.search);
         const encodedQuery = searchParams.get("query");
 
         if (encodedQuery) {
-          // Decode base64
           const decodedQuery = window.atob(encodedQuery);
           const userData = JSON.parse(decodedQuery);
 
-          // Lakukan login
           const response = await login({
             nip: userData.nip,
             token: userData.token_auth,
           }).unwrap();
 
-          // Simpan credentials
           dispatch(setCredentials(response.data));
 
-          // Redirect ke halaman dashboard atau home
+          const settingResponse = await axios.get(
+            `${BASE_API_URL}/v1/konfigurasi/list`,
+            {
+              headers: {
+                "X-key": userData.nip,
+                token: userData.token_auth,
+              },
+            }
+          );
+
+          dispatch(setSetting(settingResponse.data.data));
           router.push("/dashboard");
         }
       } catch (error) {
         console.error("Authentication error:", error);
-        // Redirect ke halaman login jika gagal
         router.push(`${HOST_PORTAL}`);
       }
     };

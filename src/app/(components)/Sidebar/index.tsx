@@ -18,6 +18,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ROLE_ROUTES } from "@/utils/authorization";
+import { useSelector } from "react-redux";
+import { selectSetting } from "@/state/settingSlice";
 
 interface SidebarLinkProps {
   href: string;
@@ -75,6 +77,7 @@ const Sidebar = () => {
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed
   );
+  const setting = useSelector(selectSetting);
   const { user } = useAppSelector((state) => state.auth);
 
   const toggleSidebar = () => {
@@ -106,13 +109,23 @@ const Sidebar = () => {
         }`}
       >
         <div>
-          <Image
-            src={"/assets/logo/MPP.png"}
-            alt={"MPP Logo"}
-            width={120}
-            height={120}
-            className="mr-4"
-          />
+          {setting.logo ? (
+            <Image
+              src={setting.logo}
+              alt={"MPP Logo"}
+              width={120}
+              height={120}
+              className="mr-4"
+            />
+          ) : (
+            <Image
+              src={"/assets/logo/MPP.png"}
+              alt={"MPP Logo"}
+              width={120}
+              height={120}
+              className="mr-4"
+            />
+          )}
         </div>
 
         <button
@@ -143,7 +156,8 @@ const Sidebar = () => {
 
       {/* FOOTER */}
       <div className={`${isSidebarCollapsed ? "hidden" : "block"} mb-10`}>
-        <p className="text-center text-xs text-gray-500">&copy; 2024</p>
+        <p className="text-center text-xs text-gray-500">{setting.versi}</p>
+        <p className="text-center text-xs text-gray-500">{setting.footer}</p>
       </div>
     </div>
   );
