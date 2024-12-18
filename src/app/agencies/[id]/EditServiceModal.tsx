@@ -13,7 +13,6 @@ import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import * as z from "zod";
 
-// Skema validasi Zod untuk edit layanan
 const editServiceSchema = z.object({
   layanan: z.string().min(2, { message: "Nama layanan minimal 2 karakter" }),
   deskripsi: z.string().optional(),
@@ -34,16 +33,13 @@ const EditServiceModal: React.FC<EditServiceModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  // Tambahkan state untuk deskripsi
   const [deskripsi, setDeskripsi] = useState<string>("");
 
-  // Query untuk mendapatkan detail layanan
   const { data: serviceData, isLoading: isLoadingService } =
     useGetServiceByIdQuery({
       serviceId,
     });
 
-  // Mutation untuk update layanan
   const [updateService, { isLoading: isUpdating }] = useUpdateServiceMutation();
 
   const {
@@ -65,7 +61,6 @@ const EditServiceModal: React.FC<EditServiceModalProps> = ({
     if (serviceData?.data && isOpen) {
       const serviceDeskripsi = serviceData.data.deskripsi || "";
 
-      // Set deskripsi ke state
       setDeskripsi(serviceDeskripsi);
 
       reset({
@@ -87,7 +82,7 @@ const EditServiceModal: React.FC<EditServiceModalProps> = ({
       await updateService(payload).unwrap();
 
       toast.success("Layanan berhasil diperbarui");
-      onClose(); // Tutup modal
+      onClose();
     } catch (error) {
       console.error("Gagal memperbarui layanan", error);
       toast.error("Gagal memperbarui layanan");
@@ -96,13 +91,8 @@ const EditServiceModal: React.FC<EditServiceModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Loading state saat mengambil data layanan
   if (isLoadingService) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <LoadingSpinner />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (

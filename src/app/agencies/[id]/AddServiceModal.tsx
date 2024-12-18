@@ -9,10 +9,9 @@ import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 import * as z from "zod";
 
-// Perbarui skema validasi untuk menyertakan deskripsi
 const serviceSchema = z.object({
   layanan: z.string().min(2, { message: "Nama layanan minimal 2 karakter" }),
-  deskripsi: z.string().optional(), // Opsional, bisa disesuaikan
+  deskripsi: z.string().optional(),
 });
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
@@ -55,8 +54,8 @@ const AddServiceModal: React.FC<AddServiceModalProps> = ({
       await createService(payload).unwrap();
 
       toast.success("Layanan berhasil ditambahkan");
-      reset(); // Reset form
-      onClose(); // Tutup modal
+      reset();
+      onClose();
     } catch (error) {
       console.error("Gagal menambahkan layanan", error);
       toast.error("Gagal menambahkan layanan");

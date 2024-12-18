@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import * as z from "zod";
 
 export const getHeaders = (): { "X-Key"?: string; Token?: string } => {
@@ -64,7 +65,7 @@ export const formatTanggalIndonesia = (tanggal: Date | string) => {
   } ${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 };
 
-const MAX_FILE_SIZE = 500000;
+const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
   "image/jpeg",
   "image/jpg",
@@ -91,12 +92,12 @@ export function createImageValidation(
 
         // Validasi ukuran
         if (file.size > maxSize) {
-          throw new Error(`Ukuran maksimal file ${maxSize / 1024 / 1024}MB.`);
+          toast.error(`Ukuran maksimal file 5MB.`);
         }
 
         // Validasi tipe
         if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-          throw new Error(
+          toast.error(
             "Hanya ekstensi .jpg, .jpeg, .png and .webp yang didukung."
           );
         }
@@ -116,7 +117,7 @@ export function createImageValidation(
     .refine((file) => {
       // Validasi ukuran maksimal
       return file.size <= maxSize;
-    }, `Ukuran maksimal file ${maxSize / 1024 / 1024}MB.`)
+    }, `Ukuran maksimal file 5 MB.`)
     .refine(
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
       "Hanya ekstensi .jpg, .jpeg, .png and .webp yang didukung."

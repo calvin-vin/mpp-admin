@@ -19,6 +19,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import ModalDelete from "../(components)/ModalDelete";
 import ErrorDisplay from "../(components)/ErrorDisplay";
+import LoadingSpinner from "../(components)/LoadingSpinner";
 
 const AgencyPage = () => {
   const [search, setSearch] = useState("");
@@ -57,7 +58,11 @@ const AgencyPage = () => {
   };
 
   if (isError) {
-    <ErrorDisplay callback={refetch} />;
+    return <ErrorDisplay callback={refetch} />;
+  }
+
+  if (isLoading) {
+    return <LoadingSpinner />;
   }
 
   return (
@@ -87,94 +92,88 @@ const AgencyPage = () => {
         </Link>
       </div>
       {/* AGENCY LIST */}
-      {isLoading ? (
-        <div className="flex justify-center items-center min-h-[50vh]">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary"></div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {agenciesData?.agencies.map((agency: Agency) => (
-            <div
-              key={agency.id_instansi}
-              className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center transform transition-all hover:scale-105 relative group"
-            >
-              {/* Status dari Instansi */}
-              <div className="absolute top-2 left-2 flex">
-                <span
-                  className={`px-2 py-1 rounded-full text-xs ${
-                    agency.aktif == "1"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  {agency.aktif == "1" ? "Aktif" : "Tidak Aktif"}
-                </span>
-              </div>
-
-              {/* Tombol Edit & Delete dengan efek hover */}
-              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex">
-                <Link
-                  href={`/agencies/edit/${agency.id_instansi}`}
-                  className="text-green-500 hover:text-green-700 bg-white/80 rounded-full p-1 shadow-sm"
-                  aria-label={`Edit ${agency.instansi}`}
-                >
-                  <EditIcon className="w-4 h-4" strokeWidth={1.5} />
-                </Link>
-
-                <button
-                  onClick={() => handleShowModalDelete(agency.id_instansi)}
-                  className="text-red-500 hover:text-red-700 bg-white/80 rounded-full p-1 shadow-sm"
-                  aria-label={`Delete ${agency.instansi}`}
-                >
-                  <Trash2Icon className="w-4 h-4" strokeWidth={1.5} />
-                </button>
-              </div>
-
-              {/* Logo Agency */}
-              {agency.logo ? (
-                <div className="w-24 h-24 mb-6 flex items-center justify-center">
-                  <Image
-                    src={agency.logo}
-                    alt={`Logo ${agency.instansi}`}
-                    width={96}
-                    height={96}
-                    className="object-contain"
-                    priority={false}
-                  />
-                </div>
-              ) : (
-                <div className="w-24 h-24 mb-4 flex items-center justify-center bg-gray-100 rounded-full">
-                  <span className="text-gray-500">No Logo</span>
-                </div>
-              )}
-
-              <h3 className="text-xl font-bold text-gray-800 mb-3 text-center">
-                {agency.instansi}
-              </h3>
-
-              <div className="mt-auto w-full">
-                <div className="flex items-center justify-center mb-3 w-full">
-                  <div className="bg-gray-100 rounded-full px-3 py-1 text-sm text-gray-700">
-                    <span className="font-medium">Kode:</span> {agency.kode}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-center mb-3 text-sm text-gray-600">
-                  Jumlah Petugas: {agency.jumlah_petugas}
-                </div>
-
-                <Link
-                  href={`/agencies/${agency.id_instansi}`}
-                  className="w-full flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 font-semibold py-2 px-4 rounded-lg transition-colors"
-                >
-                  <EyeIcon className="w-5 h-5 mr-2" />
-                  Lihat Detail
-                </Link>
-              </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {agenciesData?.agencies.map((agency: Agency) => (
+          <div
+            key={agency.id_instansi}
+            className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center transform transition-all hover:scale-105 relative group"
+          >
+            {/* Status dari Instansi */}
+            <div className="absolute top-2 left-2 flex">
+              <span
+                className={`px-2 py-1 rounded-full text-xs ${
+                  agency.aktif == "1"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {agency.aktif == "1" ? "Aktif" : "Tidak Aktif"}
+              </span>
             </div>
-          ))}
-        </div>
-      )}
+
+            {/* Tombol Edit & Delete dengan efek hover */}
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex">
+              <Link
+                href={`/agencies/edit/${agency.id_instansi}`}
+                className="text-green-500 hover:text-green-700 bg-white/80 rounded-full p-1 shadow-sm"
+                aria-label={`Edit ${agency.instansi}`}
+              >
+                <EditIcon className="w-4 h-4" strokeWidth={1.5} />
+              </Link>
+
+              <button
+                onClick={() => handleShowModalDelete(agency.id_instansi)}
+                className="text-red-500 hover:text-red-700 bg-white/80 rounded-full p-1 shadow-sm"
+                aria-label={`Delete ${agency.instansi}`}
+              >
+                <Trash2Icon className="w-4 h-4" strokeWidth={1.5} />
+              </button>
+            </div>
+
+            {/* Logo Agency */}
+            {agency.logo ? (
+              <div className="w-24 h-24 mb-6 flex items-center justify-center">
+                <Image
+                  src={agency.logo}
+                  alt={`Logo ${agency.instansi}`}
+                  width={96}
+                  height={96}
+                  className="object-contain"
+                  priority={false}
+                />
+              </div>
+            ) : (
+              <div className="w-24 h-24 mb-4 flex items-center justify-center bg-gray-100 rounded-full">
+                <span className="text-gray-500">No Logo</span>
+              </div>
+            )}
+
+            <h3 className="text-xl font-bold text-gray-800 mb-3 text-center">
+              {agency.instansi}
+            </h3>
+
+            <div className="mt-auto w-full">
+              <div className="flex items-center justify-center mb-3 w-full">
+                <div className="bg-gray-100 rounded-full px-3 py-1 text-sm text-gray-700">
+                  <span className="font-medium">Kode:</span> {agency.kode}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center mb-3 text-sm text-gray-600">
+                Jumlah Petugas: {agency.jumlah_petugas}
+              </div>
+
+              <Link
+                href={`/agencies/${agency.id_instansi}`}
+                className="w-full flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 font-semibold py-2 px-4 rounded-lg transition-colors"
+              >
+                <EyeIcon className="w-5 h-5 mr-2" />
+                Lihat Detail
+              </Link>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <ModalDelete
         show={showModalDelete}

@@ -7,7 +7,6 @@ import {
   useGetAgencyByIdQuery,
   useUpdateAgencyMutation,
 } from "@/state/agencySlice";
-import { createImageValidation } from "@/utils/helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save } from "lucide-react";
 import Image from "next/image";
@@ -15,35 +14,15 @@ import { useParams, useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import * as z from "zod";
-
-// Skema Validasi Zod (sama dengan AddAgency)
-const formSchema = z.object({
-  instansi: z.string().min(2, { message: "Nama instansi minimal 2 karakter" }),
-  kode: z.string().min(2, { message: "Kode instansi minimal 2 karakter" }),
-  no_tenant: z.preprocess(
-    (val) => String(val),
-    z.string().min(1, { message: "Nomor tenant harus diisi" })
-  ),
-  jumlah_petugas: z.coerce
-    .number()
-    .min(1, { message: "Jumlah petugas harus lebih dari 0" }),
-  aktif: z.boolean(),
-  logo: createImageValidation(),
-});
-
-// Definisi tipe berdasarkan skema
-type FormData = z.infer<typeof formSchema>;
+import { type FormData, formSchema } from "../../utils";
 
 const EditAgency = () => {
   const router = useRouter();
   const { id } = useParams();
 
-  // Query untuk mendapatkan data agency
   const { data: agencyData, isLoading: isLoadingAgency } =
     useGetAgencyByIdQuery({ id });
 
-  // Mutation untuk update agency
   const [updateAgency, { error: errorsAPI }] = useUpdateAgencyMutation();
 
   const {
@@ -60,7 +39,6 @@ const EditAgency = () => {
   // Preview logo
   const logoFile = watch("logo");
 
-  // Versi paling sederhana dan efisien
   useEffect(() => {
     if (agencyData?.data) {
       reset({
@@ -81,7 +59,7 @@ const EditAgency = () => {
     }
   };
 
-  // Submit handler dengan error handling yang lebih baik
+  // Submit handler
   const onSubmit = async (formData: FormData) => {
     try {
       const submitData = new FormData();
@@ -111,7 +89,6 @@ const EditAgency = () => {
     }
   };
 
-  // Loading state
   if (isLoadingAgency) {
     return <LoadingSpinner />;
   }
@@ -211,6 +188,11 @@ const EditAgency = () => {
               onChange={handleLogoChange}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
             />
+            {errors.logo && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.logo.message as string}
+              </p>
+            )}
 
             {/* Tampilkan logo lama jika ada */}
             {agencyData?.data?.logo && !logoFile && (

@@ -27,7 +27,6 @@ const AgencyPage = () => {
     null
   );
 
-  // Mutation untuk menghapus layanan
   const [deleteService, { isLoading: isDeleting }] = useDeleteServiceMutation();
 
   const {
@@ -76,7 +75,6 @@ const AgencyPage = () => {
     setIsEditServiceModalOpen(false);
   };
 
-  // Di dalam komponen AgencyPage
   const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
 
   const handleOpenAddServiceModal = () => {
@@ -98,9 +96,7 @@ const AgencyPage = () => {
   return (
     <>
       <div className="container mx-auto px-4 pb-24">
-        <div className="pb-6">
-          <BackButton />
-        </div>
+        <BackButton />
         {/* Header Instansi */}
         <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-2xl p-6 mb-8 shadow-sm">
           <div className="flex items-center space-x-6">

@@ -8,24 +8,9 @@ import { PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+
 import toast from "react-hot-toast";
-import { createImageValidation } from "@/utils/helpers";
-
-// Skema Validasi Zod
-const formSchema = z.object({
-  instansi: z.string().min(2, { message: "Nama instansi minimal 2 karakter" }),
-  kode: z.string().min(2, { message: "Kode instansi minimal 2 karakter" }),
-  no_tenant: z.string().min(1, { message: "Nomor tenant harus diisi" }),
-  jumlah_petugas: z.coerce
-    .number()
-    .min(1, { message: "Jumlah petugas harus lebih dari 0" }),
-  aktif: z.boolean(),
-  logo: createImageValidation(),
-});
-
-// Definisi tipe berdasarkan skema
-type FormData = z.infer<typeof formSchema>;
+import { type FormData, formSchema } from "../utils";
 
 const AddAgency = () => {
   const router = useRouter();
@@ -67,7 +52,6 @@ const AddAgency = () => {
         submitData.append("logo", formData.logo);
       }
 
-      // Gunakan unwrap() untuk mendapatkan error yang lebih detail
       await createAgency(submitData).unwrap();
 
       toast.success("Instansi berhasil ditambahkan");
