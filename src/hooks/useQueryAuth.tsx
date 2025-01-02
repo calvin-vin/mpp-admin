@@ -1,11 +1,10 @@
 // src/hooks/useQueryAuth.ts
 import { setCredentials, useLoginMutation } from "@/state/authSlice";
-import { setSetting } from "@/state/settingSlice"; // Gunakan hook dari RTK Query
+import { setSetting } from "@/state/settingSlice";
 import { BASE_API_URL, HOST_PORTAL } from "@/utils/constants";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 
 export const useQueryAuth = () => {

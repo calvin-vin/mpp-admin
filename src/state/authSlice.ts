@@ -12,6 +12,8 @@ export interface User {
   nama_role: string;
   token: string;
   menu: string[];
+  id_instansi: string;
+  instansi: string;
 }
 
 // Interface untuk response login
@@ -59,6 +61,8 @@ export const authSlice = createSlice({
         menu,
         token,
         id_role,
+        id_instansi,
+        instansi,
       } = action.payload;
       const user = {
         nip,
@@ -69,6 +73,8 @@ export const authSlice = createSlice({
         menu,
         token,
         id_role,
+        id_instansi,
+        instansi,
       };
       state.user = user;
       state.token = token;

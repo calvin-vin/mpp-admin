@@ -8,7 +8,7 @@ interface ServiceOption {
 }
 
 // Custom hook menggunakan RTK Query
-export const useServices = () => {
+export const useServices = (agencyId = null) => {
   // Gunakan query untuk mendapatkan semua layanan
   const {
     data: servicesData,
@@ -17,12 +17,22 @@ export const useServices = () => {
     refetch,
   } = serviceSlice.endpoints.getAllServices.useQuery({
     page: 1,
-    perPage: 100, // Ambil semua layanan
+    perPage: 999,
   });
 
   // Transform data layanan menjadi opsi untuk dropdown/select
   const serviceList = useMemo<ServiceOption[]>(() => {
     if (!servicesData?.services) return [];
+
+    if (agencyId) {
+      return servicesData.services
+        .filter((service) => service.id_instansi == agencyId)
+        .map((service) => ({
+          value: service.id_layanan, // Gunakan ID sebagai value
+          label: service.layanan, // Nama layanan sebagai label
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+    }
 
     return servicesData.services
       .map((service) => ({
@@ -32,21 +42,10 @@ export const useServices = () => {
       .sort((a, b) => a.label.localeCompare(b.label));
   }, [servicesData]);
 
-  // Fungsi untuk mendapatkan opsi layanan spesifik
-  const getServiceById = useCallback(
-    (id: number | string) => {
-      return servicesData?.services.find(
-        (service) => service.id === (typeof id === "string" ? parseInt(id) : id)
-      );
-    },
-    [servicesData]
-  );
-
   return {
     serviceList, // Daftar layanan untuk dropdown
     services: servicesData?.services || [], // Daftar lengkap layanan
     pagination: servicesData?.pagination, // Informasi pagination
-    getServiceById, // Fungsi untuk mendapatkan detail layanan berdasarkan ID
     isLoading, // Status loading
     error, // Error jika terjadi
     refetch, // Fungsi untuk me-refresh data

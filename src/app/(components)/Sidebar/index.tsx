@@ -65,6 +65,7 @@ const SIDEBAR_ROUTES = {
   "/dashboard": { icon: Layout, label: "Dashboard" },
   "/agencies": { icon: Building, label: "Instansi" },
   "/queues": { icon: Clipboard, label: "Antrian" },
+  "/queues-agency": { icon: Clipboard, label: "Antrian" },
   "/regulation": { icon: Scale, label: "Regulasi" },
   "/facilities": { icon: Armchair, label: "Fasilitas" },
   "/roles": { icon: Shield, label: "Roles" },
@@ -108,25 +109,13 @@ const Sidebar = () => {
           isSidebarCollapsed ? "px-5" : "px-8"
         }`}
       >
-        <div>
-          {setting.logo ? (
-            <Image
-              src={setting.logo}
-              alt={"MPP Logo"}
-              width={120}
-              height={120}
-              className="mr-4"
-            />
-          ) : (
-            <Image
-              src={"/assets/logo/MPP.png"}
-              alt={"MPP Logo"}
-              width={120}
-              height={120}
-              className="mr-4"
-            />
-          )}
-        </div>
+        <Image
+          src={"/assets/logo/MPP.png"}
+          alt={"MPP Logo"}
+          width={120}
+          height={120}
+          className="mr-4"
+        />
 
         <button
           className="md:hidden px-3 py-3 bg-gray-100 rounded-full hover:bg-blue-100"

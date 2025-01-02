@@ -8,14 +8,16 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import Popover from "../(components)/Popover";
 import {
-  useUpdateQueueStatusToFinishMutation,
-  useUpdateQueueStatusToPresentMutation,
-} from "@/state/queueSlice";
+  useUpdateQueueAgencyStatusToFinishMutation,
+  useUpdateQueueAgencyStatusToPresentMutation,
+} from "@/state/queueAgencySlice";
 
 const ChangeStatus = ({ params }) => {
   const [status, setStatus] = useState(params.row.status?.toUpperCase());
-  const [updateQueueStatusToPresent] = useUpdateQueueStatusToPresentMutation();
-  const [updateQueueStatusToFinish] = useUpdateQueueStatusToFinishMutation();
+  const [updateQueueStatusToPresent] =
+    useUpdateQueueAgencyStatusToPresentMutation();
+  const [updateQueueStatusToFinish] =
+    useUpdateQueueAgencyStatusToFinishMutation();
 
   const statusConfig = {
     BOOKED: {

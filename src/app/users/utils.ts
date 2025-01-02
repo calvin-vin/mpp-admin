@@ -9,7 +9,12 @@ export const formSchema = z.object({
   mobile: z.string().min(8, { message: "Nomor HP minimal 8 karakter" }),
   status: z.enum(["ACTIVE", "INACTIVE"], { message: "Status harus dipilih" }),
   id_role: z.string().min(1, { message: "Role harus dipilih" }),
-  id_instansi: z.string().min(1, { message: "Instansi harus dipilih" }),
+  id_instansi: z
+    .union([z.string(), z.number()])
+    .transform((val) => {
+      return val.toString();
+    })
+    .refine((val) => val.length > 0, { message: "Instansi harus dipilih" }),
 });
 
 export type FormData = z.infer<typeof formSchema>;

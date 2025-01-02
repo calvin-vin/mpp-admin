@@ -2,9 +2,9 @@ import { apiSlice, PaginationMeta } from "./apiSlice";
 
 // Interface untuk Service
 export interface Service {
-  id: number;
-  layanan: string;
   id_layanan: number;
+  layanan: string;
+  id_instansi: string;
   created_at: string;
   updated_at: string;
 }
@@ -71,7 +71,7 @@ export const serviceSlice = apiSlice.injectEndpoints({
         return [
           ...result.services.map(
             (service) =>
-              ({ type: "Services" as const, id: service.id } as const)
+              ({ type: "Services" as const, id: service.id_layanan } as const)
           ),
           { type: "Services" as const, id: "LIST" },
         ];

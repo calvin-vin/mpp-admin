@@ -37,7 +37,12 @@ export const ROLE_ROUTES: Record<string, string[]> = {
     "/regulation/*",
     "/regulation/*/*",
   ],
-  OPERATOR: ["/dashboard", "/queues", "/queues/*", "/queues/*/*"],
+  OPERATOR: [
+    "/dashboard",
+    "/queues-agency",
+    "/queues-agency/*",
+    "/queues-agency/*/*",
+  ],
 };
 
 export const checkRouteAccess = (role: string, pathname: string): boolean => {
