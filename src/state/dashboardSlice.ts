@@ -26,12 +26,6 @@ interface AgencyQueueCountItem {
   total: number;
 }
 
-interface AgencyQueueCountResponse {
-  status: string;
-  data: AgencyQueueCountItem[];
-}
-
-// Definisikan interface untuk tipe data
 interface DashboardSummaryData {
   total_agencies: number;
   total_services: number;
@@ -41,6 +35,16 @@ interface DashboardSummaryData {
 interface DashboardSummaryResponse {
   status: string;
   data: DashboardSummaryData;
+}
+
+interface AgencyQueueCountData {
+  name: string;
+  total: number;
+}
+
+interface AgencyQueueCountDataResponse {
+  status: string;
+  data: AgencyQueueCountData[];
 }
 
 // Di dashboardSlice.ts
@@ -54,7 +58,7 @@ export const dashboardSlice = apiSlice.injectEndpoints({
         // Pastikan parameter tidak undefined
         const queryParams = params || {};
         return {
-          url: "/dashboard/visitor-summary",
+          url: "/dashboard/antrian-summary/list",
           method: "GET",
           params: {
             start_date: queryParams.startDate,
@@ -76,20 +80,18 @@ export const dashboardSlice = apiSlice.injectEndpoints({
       providesTags: (result, error, arg) =>
         result ? ["DashboardMetrics"] : [],
     }),
-    getAgencyQueueCount: build.query<AgencyQueueCountResponse, void>({
-      query: () => ({
-        url: "/dashboard/agency-queue-count", // Sesuaikan dengan endpoint aktual
-        method: "GET",
-      }),
-      // Opsional: Caching dan invalidasi
-      providesTags: ["DashboardMetrics"],
-    }),
     getDashboardSummary: build.query<DashboardSummaryResponse, void>({
       query: () => ({
-        url: "/dashboard/total-count", // Sesuaikan dengan endpoint aktual
+        url: "/dashboard/total/list",
         method: "GET",
       }),
-      // Opsional: Caching dan invalidasi
+      providesTags: ["DashboardMetrics"],
+    }),
+    getAgencyQueueCount: build.query<AgencyQueueCountDataResponse, void>({
+      query: () => ({
+        url: "/dashboard/antrian-instansi/list",
+        method: "GET",
+      }),
       providesTags: ["DashboardMetrics"],
     }),
   }),
