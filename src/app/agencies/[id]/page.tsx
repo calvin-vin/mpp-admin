@@ -121,8 +121,8 @@ const AgencyPage = () => {
 
             <div className="flex-grow">
               <h2
-                className="text-4xl font-extrabold text-gray-800 
-      bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark 
+                className="text-4xl font-extrabold
+      bg-clip-text text-primary bg-gradient-to-r from-primary to-primary-dark 
       mb-2 leading-tight"
               >
                 {agency?.data?.instansi}

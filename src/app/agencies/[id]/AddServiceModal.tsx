@@ -66,7 +66,7 @@ const AddServiceModal: React.FC<AddServiceModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-md mx-auto my-auto bg-white rounded-xl shadow-lg p-6">
+      <div className="relative w-full max-w-xl mx-auto my-auto bg-white rounded-xl shadow-lg p-6">
         {/* Header Modal */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-gray-800 flex items-center">
