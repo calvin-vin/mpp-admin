@@ -40,7 +40,7 @@ const Dashboard = () => {
 
   return (
     <AuthorizationWrapper>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 xl:overflow-auto gap-10 pb-4 custom-grid-rows">
+      <div className="grid grid-cols-1 md:grid-cols-2 3xl:grid-cols-3 3xl:overflow-auto gap-10 pb-4 custom-grid-rows">
         <CardVisitorSummary />
         <CardSatisfaction />
         <CardServiceSummary />
