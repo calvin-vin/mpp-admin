@@ -37,14 +37,12 @@ interface DashboardSummaryResponse {
   data: DashboardSummaryData;
 }
 
-interface AgencyQueueCountData {
-  name: string;
-  total: number;
-}
-
 interface AgencyQueueCountDataResponse {
   status: string;
-  data: AgencyQueueCountData[];
+  data: {
+    visitorCounts: number[];
+    dataLabels: string[];
+  };
 }
 
 // Di dashboardSlice.ts
@@ -52,10 +50,15 @@ export const dashboardSlice = apiSlice.injectEndpoints({
   endpoints: (build) => ({
     getVisitorSummary: build.query<
       VisitorSummaryResponse,
-      { startDate?: string; endDate?: string } | undefined
+      | {
+          startDate?: string;
+          endDate?: string;
+          agency?: string;
+          service?: string;
+        }
+      | undefined
     >({
       query: (params) => {
-        // Pastikan parameter tidak undefined
         const queryParams = params || {};
         return {
           url: "/dashboard/antrian-summary/list",
@@ -63,14 +66,10 @@ export const dashboardSlice = apiSlice.injectEndpoints({
           params: {
             start_date: queryParams.startDate,
             end_date: queryParams.endDate,
+            id_instansi: queryParams.agency,
+            id_layanan: queryParams.service,
           },
         };
-      },
-      // Caching query berdasarkan parameter
-      serializeQueryArgs: ({ queryArgs }) => {
-        return queryArgs
-          ? `${queryArgs.startDate}-${queryArgs.endDate}`
-          : "default";
       },
       // Menggabungkan cache jika diperlukan
       merge: (currentCache, newItems) => {
@@ -87,12 +86,27 @@ export const dashboardSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ["DashboardMetrics"],
     }),
-    getAgencyQueueCount: build.query<AgencyQueueCountDataResponse, void>({
-      query: () => ({
-        url: "/dashboard/antrian-instansi/list",
-        method: "GET",
-      }),
-      providesTags: ["DashboardMetrics"],
+    getAgencyQueueCount: build.query<
+      AgencyQueueCountDataResponse,
+      | {
+          startDate?: string;
+          endDate?: string;
+        }
+      | undefined
+    >({
+      query: (params) => {
+        const queryParams = params || {};
+        return {
+          url: "/dashboard/antrian-instansi/list",
+          method: "GET",
+          params: {
+            start_date: queryParams.startDate,
+            end_date: queryParams.endDate,
+          },
+        };
+      },
+      providesTags: (result, error, arg) =>
+        result ? ["DashboardMetrics"] : [],
     }),
   }),
 });
@@ -114,7 +128,7 @@ export const processVisitorSummaryData = (data: ChartData[]) => {
   // Cari hari dengan kunjungan tertinggi
   const maxVisitorDay = data.reduce(
     (max, item) => (item.total > max.total ? item : max),
-    { date: "", total: 0 }
+    { instansi: "", total: 0 }
   );
 
   return {
@@ -124,15 +138,30 @@ export const processVisitorSummaryData = (data: ChartData[]) => {
   };
 };
 
-// Fungsi utility untuk transformasi data (opsional)
-export const transformAgencyQueueCountData = (data: AgencyQueueCountItem[]) => {
-  // Urutkan dari total terbanyak
-  return [...data].sort((a, b) => b.total - a.total);
+export const transformAgencyQueueToChartData = (
+  response: AgencyQueueCountDataResponse
+): ChartData[] => {
+  return response.data.dataLabels.map((date, index) => ({
+    date,
+    total: response.data.visitorCounts[index],
+  }));
 };
 
-// Fungsi untuk mencari total keseluruhan (opsional)
-export const calculateTotalQueueCount = (data: AgencyQueueCountItem[]) => {
-  return data.reduce((sum, item) => sum + item.total, 0);
+export const processAgencyQueueData = (data: ChartData[]) => {
+  // Hitung total pengunjung
+  const totalVisitors = data.reduce((sum, item) => sum + item.total, 0);
+
+  // Cari instansi dengan kunjungan tertinggi
+  const maxAgencyVisitor = data.reduce(
+    (max, item) => (item.total > max.total ? item : max),
+    { date: "", total: 0 }
+  );
+
+  return {
+    totalVisitors,
+    maxAgencyVisitor,
+    data,
+  };
 };
 
 // Hooks yang di-generate otomatis

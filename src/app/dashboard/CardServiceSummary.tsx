@@ -1,136 +1,254 @@
-import React from "react";
-import { TrendingUp } from "lucide-react";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { useGetAgencyQueueCountQuery } from "@/state/dashboardSlice";
-import ErrorDisplay from "../(components)/ErrorDisplay";
-import LoadingSpinner from "../(components)/LoadingSpinner";
+import {
+  processAgencyQueueData,
+  processVisitorSummaryData,
+  transformAgencyQueueToChartData,
+  transformVisitorSummaryToChartData,
+  useGetAgencyQueueCountQuery,
+  useGetVisitorSummaryQuery,
+} from "@/state/dashboardSlice";
+import {
+  endOfMonth,
+  endOfWeek,
+  format,
+  startOfMonth,
+  startOfWeek,
+} from "date-fns";
+import { RefreshCcw } from "lucide-react"; // Pastikan Anda menginstal lucide-react
+import { useEffect, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-const MAX_NAME_LENGTH = 10; // Maximum length for the name before truncating
+// Tipe untuk filter
+type DateRangeFilter = "thisWeek" | "thisMonth" | "custom";
 
-const truncateName = (name: string) => {
-  return name.length > MAX_NAME_LENGTH
-    ? `${name.slice(0, MAX_NAME_LENGTH)}...`
-    : name;
+const CustomXAxisTick = (props: any) => {
+  const { x, y, payload } = props;
+  return (
+    <text
+      x={x}
+      y={y}
+      textAnchor="end"
+      transform={`rotate(-45, ${x}, ${y})`}
+      fontSize={12}
+      fill="#333"
+    >
+      {payload.value}
+    </text>
+  );
 };
 
 const CardServiceSummary = () => {
-  const {
-    data: serviceData,
-    isLoading,
-    isError,
-    refetch,
-  } = useGetAgencyQueueCountQuery();
+  // State untuk filter
+  const [dateRangeFilter, setDateRangeFilter] =
+    useState<DateRangeFilter>("thisMonth");
+  const [customStartDate, setCustomStartDate] = useState<string>(
+    format(startOfMonth(new Date()), "yyyy-MM-dd")
+  );
+  const [customEndDate, setCustomEndDate] = useState<string>(
+    format(endOfMonth(new Date()), "yyyy-MM-dd")
+  );
 
-  // Transformasi data untuk pie chart
-  const transformedServiceData =
-    serviceData?.data
-      .filter((item) => item.total > 0)
-      .map((item) => ({
-        name: item.name,
-        value: item.total,
-      })) || [];
+  // State untuk trigger query
+  const [queryParams, setQueryParams] = useState<{
+    startDate?: string;
+    endDate?: string;
+  }>({
+    startDate: format(startOfMonth(new Date()), "yyyy-MM-dd"),
+    endDate: format(endOfMonth(new Date()), "yyyy-MM-dd"),
+  });
 
-  // Hitung rata-rata
-  const averageValue = serviceData
-    ? Math.round(
-        serviceData.data.reduce((sum, item) => sum + item.total, 0) /
-          serviceData.data.length
-      )
-    : 0;
+  // Effect untuk memperbarui query params saat filter berubah
+  useEffect(() => {
+    const getDateRange = () => {
+      const today = new Date();
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+      switch (dateRangeFilter) {
+        case "thisWeek":
+          return {
+            startDate: format(startOfWeek(today), "yyyy-MM-dd"),
+            endDate: format(endOfWeek(today), "yyyy-MM-dd"),
+          };
+        case "thisMonth":
+          return {
+            startDate: format(startOfMonth(today), "yyyy-MM-dd"),
+            endDate: format(endOfMonth(today), "yyyy-MM-dd"),
+          };
+        case "custom":
+          return {
+            startDate: customStartDate,
+            endDate: customEndDate,
+          };
+      }
+    };
 
-  if (isError) {
-    return (
-      <ErrorDisplay
-        callback={() => {
-          refetch();
-        }}
-      />
-    );
-  }
+    const newParams =
+      dateRangeFilter !== "custom"
+        ? getDateRange()
+        : { startDate: customStartDate, endDate: customEndDate };
+
+    // Validasi rentang tanggal
+    if (newParams?.startDate && newParams?.endDate) {
+      setQueryParams({
+        ...newParams,
+      });
+    }
+  }, [dateRangeFilter, customStartDate, customEndDate]);
+
+  // Query dengan rentang tanggal dinamis
+  const { data, isLoading, isError } = useGetAgencyQueueCountQuery(
+    queryParams,
+    {
+      skip: !queryParams.startDate || !queryParams.endDate,
+    }
+  );
+
+  // Transform data untuk chart
+  const chartData = data ? transformAgencyQueueToChartData(data) : [];
+
+  // Proses data
+  const processedData = data ? processAgencyQueueData(chartData) : null;
+
+  // Handler untuk validasi dan update tanggal custom
+  const handleCustomDateChange = (type: "start" | "end", value: string) => {
+    if (type === "start") {
+      setCustomStartDate(value);
+      if (new Date(value) > new Date(customEndDate)) {
+        setCustomEndDate(value);
+      }
+    } else {
+      setCustomEndDate(value);
+      if (new Date(value) < new Date(customStartDate)) {
+        setCustomStartDate(value);
+      }
+    }
+  };
+
+  // Fungsi untuk mereset filter
+  const resetFilters = () => {
+    setDateRangeFilter("thisMonth");
+    setCustomStartDate(format(startOfMonth(new Date()), "yyyy-MM-dd"));
+    setCustomEndDate(format(endOfMonth(new Date()), "yyyy-MM-dd"));
+  };
 
   return (
-    <div className="row-span-3 bg-white shadow-md rounded-2xl flex flex-col justify-between">
-      {/* HEADER */}
-      <div>
-        <h2 className="text-lg font-semibold mb-2 px-7 pt-5">
-          Jumlah Antrian Instansi
-        </h2>
-        <hr />
-      </div>
+    <div className="flex flex-col justify-between row-span-2 xl:row-span-3 col-span-1 md:col-span-2 xl:col-span-1 bg-white shadow-md rounded-2xl">
+      {/* Filter Dropdown */}
+      <div className="px-7 pt-5 flex justify-between items-center">
+        <h2 className="text-lg font-semibold">Jumlah Antrian Instansi</h2>
+        <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2">
+          {/* Dropdown Filter */}
+          <select
+            value={dateRangeFilter}
+            onChange={(e) =>
+              setDateRangeFilter(e.target.value as DateRangeFilter)
+            }
+            className="px-2 py-1 border rounded"
+          >
+            <option value="thisWeek">Minggu Ini</option>
+            <option value="thisMonth">Bulan Ini</option>
+            <option value="custom">Custom</option>
+          </select>
 
-      {/* BODY */}
-      <div className="xl:flex justify-center px-2">
-        {/* CHART */}
-        <div className="relative basis-3/5">
-          <ResponsiveContainer width="100%" height={500}>
-            <PieChart>
-              <defs>
-                <linearGradient
-                  id="gradientFill"
-                  x1="0%"
-                  y1="0%"
-                  x2="100%"
-                  y2="0%"
-                >
-                  <stop
-                    offset="0%"
-                    style={{ stopColor: "#16927E", stopOpacity: 1 }}
-                  />
-                  <stop
-                    offset="100%"
-                    style={{ stopColor: "#F2D457", stopOpacity: 1 }}
-                  />
-                </linearGradient>
-              </defs>
-              <Pie
-                data={transformedServiceData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                fill="url(#gradientFill)"
-                label={({ name, percent }) =>
-                  `${truncateName(name)} (${(percent * 100).toFixed(0)}%)`
+          {/* Custom Date Range */}
+          {dateRangeFilter === "custom" && (
+            <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
+              <input
+                type="date"
+                value={customStartDate}
+                onChange={(e) =>
+                  handleCustomDateChange("start", e.target.value)
                 }
-              >
-                {transformedServiceData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={`url(#gradientFill)`} />
-                ))}
-              </Pie>
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    return (
-                      <div className="bg-white border border-gray-300 p-2 rounded">
-                        <p>{payload[0].name}</p>
-                        <p>{`Total: ${payload[0].value}`}</p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
+                className="px-2 py-1 border rounded"
+                max={customEndDate}
               />
-            </PieChart>
-          </ResponsiveContainer>
+              <input
+                type="date"
+                value={customEndDate}
+                onChange={(e) => handleCustomDateChange("end", e.target.value)}
+                className="px-2 py-1 border rounded"
+                min={customStartDate}
+              />
+            </div>
+          )}
+
+          {/* Tombol Reset Filter */}
+          <button
+            onClick={resetFilters}
+            className="flex items-center px-2 py-1 text-gray-700 hover:bg-gray-200"
+          >
+            <RefreshCcw />
+          </button>
         </div>
       </div>
 
-      {/* FOOTER */}
-      <div>
-        <hr />
-        <div className="mt-3 flex justify-between items-center px-7 mb-4">
-          <div className="pt-2">
-            <p className="text-sm">
-              Rata-rata: <span className="font-semibold">{averageValue}</span>
-            </p>
+      {isLoading ? (
+        <div className="m-5">Memuat...</div>
+      ) : isError ? (
+        <div className="m-5 text-red-500">Gagal memuat data</div>
+      ) : (
+        <>
+          <hr className="mt-2" />
+
+          {/* Body */}
+          <div>
+            {/* Statistik */}
+            <div className="flex justify-between items-center mb-6 px-7 mt-5">
+              <div className="text-lg font-medium">
+                <p className="text-xs text-gray-400">Jumlah Kunjungan</p>
+                <span className="text-2xl font-extrabold">
+                  {processedData.totalVisitors || 0}
+                </span>
+              </div>
+            </div>
+            {/* Chart */}
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart
+                data={chartData}
+                margin={{ top: 0, right: 0, left: -25, bottom: 40 }}
+                className="relative z-10"
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  interval={0} // Show all labels
+                  tick={<CustomXAxisTick />} // Use custom tick renderer
+                />
+                <YAxis />
+                <Tooltip />
+                <Bar
+                  dataKey="total"
+                  fill="#16927E"
+                  barSize={25}
+                  radius={[5, 5, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+            ;
           </div>
-        </div>
-      </div>
+
+          {/* Footer */}
+          <div>
+            <hr />
+            <div className="flex justify-between items-center mt-6 text-sm px-7 mb-4">
+              <p>Total Instansi: {chartData.length || 0}</p>
+              <p>
+                Kunjungan Terbanyak:
+                <span className="font-bold ml-2">
+                  {`${processedData.maxAgencyVisitor.total} (${processedData.maxAgencyVisitor.date})` ||
+                    0}
+                </span>
+              </p>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -48,7 +48,7 @@ const QueueFilter = ({
     isLoading: isLoadingService,
     error: errorService,
     refetch: refetchService,
-  } = useServices();
+  } = useServices(filters.agency);
   const {
     agencyList,
     isLoading: isLoadingAgency,

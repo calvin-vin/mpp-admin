@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   useGetVisitorSummaryQuery,
   transformVisitorSummaryToChartData,
@@ -20,6 +20,9 @@ import {
   startOfWeek,
   endOfWeek,
 } from "date-fns";
+import useServices from "@/hooks/useServices";
+import useAgencies from "@/hooks/useAgencies";
+import { RefreshCcw } from "lucide-react"; // Pastikan Anda menginstal lucide-react
 
 // Tipe untuk filter
 type DateRangeFilter = "thisWeek" | "thisMonth" | "custom";
@@ -39,14 +42,21 @@ const CardVisitorSummary = () => {
   const [queryParams, setQueryParams] = useState<{
     startDate?: string;
     endDate?: string;
+    agency?: string;
+    service?: string;
   }>({
     startDate: format(startOfMonth(new Date()), "yyyy-MM-dd"),
     endDate: format(endOfMonth(new Date()), "yyyy-MM-dd"),
   });
 
+  // State untuk filters
+  const [filters, setFilters] = useState({
+    agency: "",
+    service: "",
+  });
+
   // Effect untuk memperbarui query params saat filter berubah
   useEffect(() => {
-    // Hitung rentang tanggal berdasarkan filter
     const getDateRange = () => {
       const today = new Date();
 
@@ -76,13 +86,16 @@ const CardVisitorSummary = () => {
 
     // Validasi rentang tanggal
     if (newParams?.startDate && newParams?.endDate) {
-      setQueryParams(newParams);
+      setQueryParams({
+        ...newParams,
+        agency: filters.agency,
+        service: filters.service,
+      });
     }
-  }, [dateRangeFilter, customStartDate, customEndDate]);
+  }, [dateRangeFilter, customStartDate, customEndDate, filters]);
 
   // Query dengan rentang tanggal dinamis
   const { data, isLoading, isError } = useGetVisitorSummaryQuery(queryParams, {
-    // Tambahkan skip untuk mencegah query awal yang tidak perlu
     skip: !queryParams.startDate || !queryParams.endDate,
   });
 
@@ -96,27 +109,99 @@ const CardVisitorSummary = () => {
   const handleCustomDateChange = (type: "start" | "end", value: string) => {
     if (type === "start") {
       setCustomStartDate(value);
-
-      // Pastikan tanggal awal tidak lebih besar dari tanggal akhir
       if (new Date(value) > new Date(customEndDate)) {
         setCustomEndDate(value);
       }
     } else {
       setCustomEndDate(value);
-
-      // Pastikan tanggal akhir tidak lebih kecil dari tanggal awal
       if (new Date(value) < new Date(customStartDate)) {
         setCustomStartDate(value);
       }
     }
   };
 
+  // Handler untuk perubahan filter
+  const handleFilterChange = (
+    filterType: "agency" | "service",
+    value: string
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      [filterType]: value,
+    }));
+  };
+
+  // Fungsi untuk mereset filter
+  const resetFilters = () => {
+    setFilters({ agency: "", service: "" });
+    setDateRangeFilter("thisMonth");
+    setCustomStartDate(format(startOfMonth(new Date()), "yyyy-MM-dd"));
+    setCustomEndDate(format(endOfMonth(new Date()), "yyyy-MM-dd"));
+  };
+
+  const {
+    agencyList,
+    isLoading: isLoadingAgency,
+    error: errorAgency,
+  } = useAgencies();
+
+  const {
+    serviceList,
+    isLoading: isLoadingService,
+    error: errorService,
+  } = useServices(filters.agency);
+
+  const serviceMenuItems = useMemo(
+    () =>
+      serviceList.map((opt) => (
+        <option key={opt.value} value={opt.value.toString()}>
+          {opt.label}
+        </option>
+      )),
+    [serviceList]
+  );
+
+  const agencyMenuItems = useMemo(
+    () =>
+      agencyList.map((opt) => (
+        <option key={opt.value} value={opt.value.toString()}>
+          {opt.label}
+        </option>
+      )),
+    [agencyList]
+  );
   return (
     <div className="flex flex-col justify-between row-span-2 xl:row-span-3 col-span-1 md:col-span-2 xl:col-span-1 bg-white shadow-md rounded-2xl">
       {/* Filter Dropdown */}
       <div className="px-7 pt-5 flex justify-between items-center">
         <h2 className="text-lg font-semibold">Total Kunjungan</h2>
         <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2">
+          {/* Filter Instansi */}
+          <div className="select-container">
+            <select
+              id="agency-select"
+              className="px-2 py-1 border rounded"
+              value={filters.agency}
+              onChange={(e) => handleFilterChange("agency", e.target.value)}
+            >
+              <option value="">Pilih Instansi</option>
+              {agencyMenuItems}
+            </select>
+          </div>
+
+          {/* Filter Layanan */}
+          <div className="select-container">
+            <select
+              id="service-select"
+              className="px-2 py-1 border rounded"
+              value={filters.service}
+              onChange={(e) => handleFilterChange("service", e.target.value)}
+            >
+              <option value="">Pilih Layanan</option>
+              {serviceMenuItems}
+            </select>
+          </div>
+
           {/* Dropdown Filter */}
           <select
             value={dateRangeFilter}
@@ -151,6 +236,14 @@ const CardVisitorSummary = () => {
               />
             </div>
           )}
+
+          {/* Tombol Reset Filter */}
+          <button
+            onClick={resetFilters}
+            className="flex items-center px-2 py-1 text-gray-700 hover:bg-gray-200"
+          >
+            <RefreshCcw />
+          </button>
         </div>
       </div>
 

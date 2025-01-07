@@ -43,6 +43,7 @@ const AddAgency = () => {
     try {
       const submitData = new FormData();
       submitData.append("instansi", formData.instansi);
+      submitData.append("nickname", formData.nickname);
       submitData.append("kode", formData.kode);
       submitData.append("no_tenant", formData.no_tenant);
       submitData.append("jumlah_petugas", formData.jumlah_petugas.toString());
@@ -95,6 +96,25 @@ const AddAgency = () => {
               </p>
             )}
             {RenderFieldError("instansi", errorsAPI)}
+          </div>
+
+          {/* Akronim Instansi */}
+          <div>
+            <label className="block mb-2 font-medium">
+              Akronim Instansi <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              {...register("nickname")}
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Masukkan akronim instansi"
+            />
+            {errors.nickname && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.nickname.message}
+              </p>
+            )}
+            {RenderFieldError("nickname", errorsAPI)}
           </div>
 
           {/* Kode Instansi */}

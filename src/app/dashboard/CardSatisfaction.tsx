@@ -2,18 +2,8 @@
 
 import { ChartLine } from "lucide-react";
 import React, { useEffect, useState } from "react";
-
-// Data Mocking untuk Progress Bar
-const parameters = [
-  { name: "Prosedur", value: 85 },
-  { name: "Kecepatan", value: 90 },
-  { name: "Biaya", value: 75 },
-  { name: "Produk", value: 80 },
-  { name: "Kompetensi", value: 95 },
-  { name: "Fasilitas", value: 70 },
-  { name: "Pelayanan", value: 88 },
-  { name: "Kepuasan", value: 92 },
-];
+import axios from "axios";
+import LoadingSpinner from "../(components)/LoadingSpinner";
 
 // Komponen Progress Bar dengan Animasi
 const ProgressBar = ({ value }: { value: number }) => {
@@ -36,15 +26,71 @@ const ProgressBar = ({ value }: { value: number }) => {
 
 // Komponen CardSatisfaction
 const CardSatisfaction: React.FC = () => {
+  const [parameters, setParameters] = useState<
+    { name: string; value: number }[]
+  >([]);
+  const [averageIKM, setAverageIKM] = useState(0); // State untuk menyimpan rata-rata IKM
+  const [predicate, setPredicate] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          "https://skm.pangkalpinangkota.go.id/api/reports/058680c5-1a19-48bd-8386-4c748fe9ca85"
+        );
+        if (response.data.status) {
+          const data = response.data.data.map((item: any) => ({
+            name: item.category,
+            value: Math.round(item.average_answer * 20), // Mengonversi nilai rata-rata ke persentase (0-5 menjadi 0-100)
+          }));
+
+          setParameters(data);
+
+          // Hitung rata-rata IKM
+          const total = data.reduce((acc, param) => acc + param.value, 0);
+          const average = total / data.length;
+
+          if (average < 65) {
+            setPredicate("D ~ Tidak Baik");
+          } else if (average >= 65 && average <= 76.6) {
+            setPredicate("C ~ Kurang Baik");
+          } else if (average >= 76.61 && average <= 88.3) {
+            setPredicate("B ~  Baik");
+          } else {
+            setPredicate("A ~ Sangat Baik");
+          }
+
+          setAverageIKM(average); // Simpan rata-rata IKM
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  console.log(predicate);
+
   return (
     <div className="flex flex-col items-center md:flex-row justify-between row-span-2 xl:row-span-3 col-span-1 md:col-span-2 xl:col-span-1 bg-white shadow-md rounded-2xl ">
       {/* Kolom Kiri: Nilai IKM */}
       <div className="md:w-1/3 w-full p-4 flex flex-col items-center border-b md:border-b-0 md:border-r border-gray-300">
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+          Indeks Kepuasan Masyarakat
+        </h3>{" "}
+        {/* Teks IKM */}
         <ChartLine className="text-primary text-5xl mb-4" />
-        <h2 className="text-4xl font-bold">85.5</h2>
-        <p className="text-gray-700 text-center mt-2">
-          Indeks Kepuasan Masyarakat (IKM)
-        </p>
+        <h2 className="text-4xl font-bold">{averageIKM.toFixed(1)}</h2>{" "}
+        {/* Tampilkan rata-rata IKM */}
+        <p className="text-gray-700 text-center mt-2">{predicate}</p>
       </div>
 
       {/* Kolom Kanan: Progress Bar untuk 8 Parameter */}

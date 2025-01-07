@@ -26,6 +26,7 @@ export interface ServiceApiResponse {
 interface GetServicesParams {
   page?: number;
   perPage?: number;
+  agencyId?: string;
 }
 
 // Slice untuk service
@@ -39,13 +40,25 @@ export const serviceSlice = apiSlice.injectEndpoints({
       },
       GetServicesParams
     >({
-      query: (params = {}) => ({
-        url: "/layanan/list",
-        params: {
-          page: params.page ?? 1,
-          per_page: params.perPage ?? 10,
-        },
-      }),
+      query: (params = {}) => {
+        if (params.agencyId) {
+          return {
+            url: "/layanan/list",
+            params: {
+              page: params.page ?? 1,
+              per_page: params.perPage ?? 10,
+              id_instansi: params.agencyId,
+            },
+          };
+        }
+        return {
+          url: "/layanan/list",
+          params: {
+            page: params.page ?? 1,
+            per_page: params.perPage ?? 10,
+          },
+        };
+      },
       transformResponse: (response: ServiceApiResponse) => {
         // Transform data sesuai kebutuhan
         const transformedServices = response.data.map((service) => ({

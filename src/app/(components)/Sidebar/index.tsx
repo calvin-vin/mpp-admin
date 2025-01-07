@@ -106,16 +106,18 @@ const Sidebar = () => {
       {/* TOP LOGO */}
       <div
         className={`flex gap-3 justify-between md:justify-normal items-center pt-8 ${
-          isSidebarCollapsed ? "px-5" : "px-8"
+          isSidebarCollapsed ? "px-2" : "px-8"
         }`}
       >
-        <Image
-          src={"/assets/logo/MPP.png"}
-          alt={"MPP Logo"}
-          width={120}
-          height={120}
-          className="mr-4"
-        />
+        <Link href={"/dashboard"}>
+          <Image
+            src={"/assets/logo/MPP.png"}
+            alt={"MPP Logo"}
+            width={120}
+            height={120}
+            className="mr-4"
+          />
+        </Link>
 
         <button
           className="md:hidden px-3 py-3 bg-gray-100 rounded-full hover:bg-blue-100"

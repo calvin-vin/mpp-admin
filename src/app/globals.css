@@ -74,3 +74,14 @@ body,
 .ProseMirror ol ol {
   list-style-type: lower-alpha;
 }
+
+.select-container {
+  width: 200px; /* Atur lebar sesuai kebutuhan */
+}
+
+.select-container select {
+  width: 100%; /* Membuat select mengambil lebar penuh dari container */
+  overflow: hidden; /* Menyembunyikan teks yang melampaui batas */
+  text-overflow: ellipsis; /* Menambahkan elipsis (...) di akhir teks yang terpotong */
+  white-space: nowrap; /* Mencegah teks membungkus */
+}

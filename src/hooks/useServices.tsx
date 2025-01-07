@@ -1,5 +1,5 @@
 import { serviceSlice } from "@/state/serviceSlice";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
 // Interface untuk opsi layanan
 interface ServiceOption {
@@ -8,7 +8,7 @@ interface ServiceOption {
 }
 
 // Custom hook menggunakan RTK Query
-export const useServices = (agencyId = null) => {
+export const useServices = (agencyId: string | null = null) => {
   // Gunakan query untuk mendapatkan semua layanan
   const {
     data: servicesData,
@@ -18,21 +18,12 @@ export const useServices = (agencyId = null) => {
   } = serviceSlice.endpoints.getAllServices.useQuery({
     page: 1,
     perPage: 999,
+    agencyId, // Kirimkan agencyId sebagai parameter
   });
 
   // Transform data layanan menjadi opsi untuk dropdown/select
   const serviceList = useMemo<ServiceOption[]>(() => {
     if (!servicesData?.services) return [];
-
-    if (agencyId) {
-      return servicesData.services
-        .filter((service) => service.id_instansi == agencyId)
-        .map((service) => ({
-          value: service.id_layanan, // Gunakan ID sebagai value
-          label: service.layanan, // Nama layanan sebagai label
-        }))
-        .sort((a, b) => a.label.localeCompare(b.label));
-    }
 
     return servicesData.services
       .map((service) => ({
@@ -40,7 +31,7 @@ export const useServices = (agencyId = null) => {
         label: service.layanan, // Nama layanan sebagai label
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
-  }, [servicesData]);
+  }, [servicesData, agencyId]);
 
   return {
     serviceList, // Daftar layanan untuk dropdown
