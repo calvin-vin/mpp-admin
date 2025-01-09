@@ -112,10 +112,10 @@ const Queue = () => {
   const isLoading = isFetchingAll || isLoadingDelete;
 
   usePusherSubscription({
-    channel: "queue-channel",
-    event: "queue-updated",
+    channel: "antrian-channel",
+    event: "list-event",
     callback: (data) => {
-      if (data.message === "queue-updated") {
+      if (data.message === "Updated") {
         refetch();
       }
     },

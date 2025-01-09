@@ -486,17 +486,19 @@ const QueueDetail = () => {
           </div>
 
           {/* Tombol Submit */}
-          <div className="mt-6">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full flex justify-center items-center bg-primary text-white font-semibold py-2 px-4 rounded 
+          {data.data.status != "FINISH" && (
+            <div className="mt-6">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full flex justify-center items-center bg-primary text-white font-semibold py-2 px-4 rounded 
             hover:bg-primary-dark transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <SaveIcon className="w-5 h-5 mr-2" />
-              {isSubmitting ? "Menyimpan..." : "Simpan"}
-            </button>
-          </div>
+              >
+                <SaveIcon className="w-5 h-5 mr-2" />
+                {isSubmitting ? "Menyimpan..." : "Simpan"}
+              </button>
+            </div>
+          )}
         </form>
       </div>
     </>

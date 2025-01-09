@@ -53,7 +53,7 @@ export const queueSlice = apiSlice.injectEndpoints({
     >({
       query: (params = {}) => {
         return {
-          url: "/antrian/list",
+          url: "/antrian-instansi/list",
           params: {
             keyword: params.search ?? "",
             is_attend: params.status ?? "",
@@ -103,7 +103,7 @@ export const queueSlice = apiSlice.injectEndpoints({
     }),
 
     getSingleQueueAgency: build.query({
-      query: ({ id }) => `/antrian/detail/${id}`,
+      query: ({ id }) => `/antrian-instansi/detail/${id}`,
       providesTags: (result, error, { id }) =>
         result ? [{ type: "Queues" as const, id }] : [],
     }),
@@ -125,7 +125,7 @@ export const queueSlice = apiSlice.injectEndpoints({
     updateQueueAgencyStatusToPresent: build.mutation({
       query: (data) => {
         return {
-          url: `/antrian/status/present`,
+          url: `/antrian-instansi/status/present`,
           method: "POST",
           body: data,
         };
@@ -139,7 +139,7 @@ export const queueSlice = apiSlice.injectEndpoints({
     updateQueueAgencyStatusToFinish: build.mutation({
       query: (data) => {
         return {
-          url: `/antrian/status/finish`,
+          url: `/antrian-instansi/status/finish`,
           method: "POST",
           body: data,
         };

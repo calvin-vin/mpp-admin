@@ -5,7 +5,7 @@ import type { Queue } from "@/state/queueSlice";
 import Header from "@/app/(components)/Header";
 import useDebounce from "@/hooks/useDebounce";
 import { usePusherSubscription } from "@/hooks/usePusherSubscription";
-import { useGetQueuesQuery } from "@/state/queueSlice";
+import { useGetQueueAgencyQuery } from "@/state/queueAgencySlice";
 import { DATA_PER_PAGE } from "@/utils/constants";
 import { formattedDate } from "@/utils/helpers";
 import { EditIcon } from "lucide-react";
@@ -13,10 +13,9 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import Datatable from "../(components)/Datatable";
 import ErrorDisplay from "../(components)/ErrorDisplay";
+import { useAppSelector } from "../redux";
 import ChangeStatus from "./ChangeStatus";
 import QueueFilter from "./QueueFilter";
-import { useGetQueueAgencyQuery } from "@/state/queueAgencySlice";
-import { useAppSelector } from "../redux";
 
 // Definisikan tipe DateRange dan FilterState seperti di QueueFilter
 interface DateRange {
