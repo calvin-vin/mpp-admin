@@ -77,8 +77,6 @@ const CardSatisfaction: React.FC = () => {
     return <LoadingSpinner />;
   }
 
-  console.log(predicate);
-
   return (
     <div className="flex flex-col items-center md:flex-row justify-between row-span-2 xl:row-span-3 col-span-1 md:col-span-2 xl:col-span-1 bg-white shadow-md rounded-2xl ">
       {/* Kolom Kiri: Nilai IKM */}

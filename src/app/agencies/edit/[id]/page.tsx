@@ -12,9 +12,10 @@ import { Save } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { type FormData, formSchema } from "../../utils";
+import TiptapEditor from "@/app/(components)/TiptapEditor";
 
 const EditAgency = () => {
   const router = useRouter();
@@ -31,6 +32,7 @@ const EditAgency = () => {
     setValue,
     watch,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -48,6 +50,7 @@ const EditAgency = () => {
         no_tenant: agencyData.data.no_tenant,
         jumlah_petugas: parseInt(agencyData.data.jumlah_petugas),
         aktif: agencyData.data.aktif === "1" || agencyData.data.aktif === true,
+        deskripsi: agencyData.data.deskripsi || "",
       });
     }
   }, [agencyData, reset]);
@@ -73,6 +76,7 @@ const EditAgency = () => {
         no_tenant: formData.no_tenant,
         jumlah_petugas: formData.jumlah_petugas.toString(),
         aktif: formData.aktif ? "1" : "0",
+        deskripsi: formData.deskripsi || "",
       }).forEach(([key, value]) => submitData.append(key, value));
 
       if (formData.logo) {
@@ -236,6 +240,20 @@ const EditAgency = () => {
                 />
               </div>
             )}
+          </div>
+
+          {/* Deskripsi */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Deskripsi Instansi
+            </label>
+            <Controller
+              name="deskripsi"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <TiptapEditor value={value as string} onChange={onChange} />
+              )}
+            />
           </div>
 
           {/* Status Aktif */}

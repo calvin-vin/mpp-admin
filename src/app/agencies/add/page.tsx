@@ -7,10 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 import toast from "react-hot-toast";
 import { type FormData, formSchema } from "../utils";
+import TiptapEditor from "@/app/(components)/TiptapEditor";
 
 const AddAgency = () => {
   const router = useRouter();
@@ -21,6 +22,7 @@ const AddAgency = () => {
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -51,6 +53,10 @@ const AddAgency = () => {
 
       if (formData.logo) {
         submitData.append("logo", formData.logo);
+      }
+
+      if (formData.deskripsi) {
+        submitData.append("deskripsi", formData.deskripsi);
       }
 
       await createAgency(submitData).unwrap();
@@ -200,6 +206,20 @@ const AddAgency = () => {
                 />
               </div>
             )}
+          </div>
+
+          {/* Deskripsi */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Deskripsi Instansi
+            </label>
+            <Controller
+              name="deskripsi"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <TiptapEditor value={value as string} onChange={onChange} />
+              )}
+            />
           </div>
 
           {/* Status Aktif */}
