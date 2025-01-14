@@ -118,12 +118,13 @@ export const dashboardSlice = apiSlice.injectEndpoints({
       providesTags: (result, error, arg) =>
         result ? ["DashboardMetrics"] : [],
     }),
-
     getVisitorSummaryTennant: build.query<
       VisitorSummaryTennantResponse,
       | {
           startDate?: string;
           endDate?: string;
+          agency?: string;
+          service?: string;
         }
       | undefined
     >({
@@ -135,6 +136,8 @@ export const dashboardSlice = apiSlice.injectEndpoints({
           params: {
             start_date: queryParams.startDate,
             end_date: queryParams.endDate,
+            id_instansi: queryParams.agency,
+            id_layanan: queryParams.service,
           },
         };
       },

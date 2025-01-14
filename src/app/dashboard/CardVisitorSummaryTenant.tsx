@@ -1,9 +1,16 @@
-import React, { useState, useEffect, useMemo } from "react";
 import {
-  useGetVisitorSummaryTennantQuery,
   transformVisitorSummaryTennantToChartData,
-  // Anda bisa menambahkan fungsi pemrosesan data jika diperlukan
-} from "@/state/dashboardSlice"; // Pastikan untuk mengimpor dari slice yang benar
+  useGetVisitorSummaryTennantQuery,
+} from "@/state/dashboardSlice";
+import {
+  endOfMonth,
+  endOfWeek,
+  format,
+  startOfMonth,
+  startOfWeek,
+} from "date-fns";
+import { RefreshCcw } from "lucide-react";
+import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -13,15 +20,31 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-} from "date-fns";
-import { RefreshCcw } from "lucide-react";
 import { useAppSelector } from "../redux";
+import { TooltipProps } from "recharts";
+import useAgencies from "@/hooks/useAgencies";
+import useServices from "@/hooks/useServices";
+
+type CustomValueType = string | number;
+
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: TooltipProps<CustomValueType, CustomValueType>) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white border border-gray-300 rounded shadow-lg p-2">
+        <p className="label mb-3">{label}</p>
+        <p className="desc text-[#1A937D]">Booked: {payload[0].value}</p>
+        <p className="desc text-[#6CAC6F]">Proses: {payload[1].value}</p>
+        <p className="desc text-[#BEC461]">Selesai: {payload[2].value}</p>
+      </div>
+    );
+  }
+
+  return null;
+};
 
 // Tipe untuk filter
 type DateRangeFilter = "thisWeek" | "thisMonth" | "custom";
@@ -43,10 +66,24 @@ const CardVisitorSummaryTennant = () => {
   const [queryParams, setQueryParams] = useState<{
     startDate?: string;
     endDate?: string;
+    agency?: string;
+    service?: string;
   }>({
     startDate: format(startOfMonth(new Date()), "yyyy-MM-dd"),
     endDate: format(endOfMonth(new Date()), "yyyy-MM-dd"),
   });
+
+  // State untuk filters
+  const [filters, setFilters] = useState({
+    agency: "",
+    service: "",
+  });
+
+  // Fetch agencies and services
+  const { agencyList, isLoading: isLoadingAgency } = useAgencies();
+  const { serviceList, isLoading: isLoadingService } = useServices(
+    user?.nama_role === "OPERATOR" ? user?.id_instansi : filters.agency
+  );
 
   // Effect untuk memperbarui query params saat filter berubah
   useEffect(() => {
@@ -79,9 +116,14 @@ const CardVisitorSummaryTennant = () => {
 
     // Validasi rentang tanggal
     if (newParams?.startDate && newParams?.endDate) {
-      setQueryParams(newParams);
+      setQueryParams({
+        ...newParams,
+        agency:
+          user?.nama_role == "OPERATOR" ? user?.id_instansi : filters.agency,
+        service: filters.service,
+      });
     }
-  }, [dateRangeFilter, customStartDate, customEndDate]);
+  }, [dateRangeFilter, customStartDate, customEndDate, filters]);
 
   // Query dengan rentang tanggal dinamis
   const { data, isLoading, isError } = useGetVisitorSummaryTennantQuery(
@@ -109,20 +151,68 @@ const CardVisitorSummaryTennant = () => {
     }
   };
 
+  // Handler untuk perubahan filter
+  const handleFilterChange = (
+    filterType: "agency" | "service",
+    value: string
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      [filterType]: value,
+    }));
+  };
+
   // Fungsi untuk mereset filter
   const resetFilters = () => {
     setDateRangeFilter("thisMonth");
     setCustomStartDate(format(startOfMonth(new Date()), "yyyy-MM-dd"));
     setCustomEndDate(format(endOfMonth(new Date()), "yyyy-MM-dd"));
+    setFilters({ agency: "", service: "" });
   };
 
   return (
     <div className="flex flex-col justify-between row-span-2 xl:row-span-3 col-span-1 md:col-span-2 xl:col-span-1 bg-white shadow-md rounded-2xl">
       {/* Filter Dropdown */}
       <div className="px-7 pt-5 flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Total Kunjungan Tenant</h2>
+        <h2 className="text-lg font-semibold">Kunjungan Tenant</h2>
         <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2">
-          {/* Dropdown Filter */}
+          {/* Dropdown Filter for Agency */}
+          {user?.nama_role != "OPERATOR" && (
+            <div className="select-container">
+              <select
+                id="agency-select"
+                className="px-2 py-1 border rounded"
+                value={filters.agency}
+                onChange={(e) => handleFilterChange("agency", e.target.value)}
+              >
+                <option value="">Pilih Instansi</option>
+                {agencyList.map((agency) => (
+                  <option key={agency.value} value={agency.value}>
+                    {agency.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Dropdown Filter for Service */}
+          <div className="select-container">
+            <select
+              id="service-select"
+              className="px-2 py-1 border rounded"
+              value={filters.service}
+              onChange={(e) => handleFilterChange("service", e.target.value)}
+            >
+              <option value="">Pilih Layanan</option>
+              {serviceList.map((service) => (
+                <option key={service.value} value={service.value}>
+                  {service.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Dropdown Filter for Date Range */}
           <select
             value={dateRangeFilter}
             onChange={(e) =>
@@ -157,7 +247,7 @@ const CardVisitorSummaryTennant = () => {
             </div>
           )}
 
-          {/* Tombol Reset Filter */}
+          {/* Reset Filters Button */}
           <button
             onClick={resetFilters}
             className="flex items-center px-2 py-1 text-gray-700 hover:bg-gray-200"
@@ -177,14 +267,6 @@ const CardVisitorSummaryTennant = () => {
 
           {/* Body */}
           <div>
-            {/* Statistik */}
-            <div className="flex justify-between items-center mb-6 px-7 mt-5">
-              <div className="text-lg font-medium">
-                <p className="text-xs text-gray-400">Jumlah Kunjungan</p>
-                <span className="text-2xl font-extrabold">{0}</span>
-              </div>
-            </div>
-
             {/* Chart */}
             <ResponsiveContainer width="100%" height={350}>
               <BarChart
@@ -199,22 +281,22 @@ const CardVisitorSummaryTennant = () => {
                   tickCount={10}
                 />
                 <YAxis />
-                <Tooltip />
+                <Tooltip content={<CustomTooltip />} />
                 <Bar
                   dataKey="booked"
-                  fill="#FF5733"
+                  fill="#1A937D"
                   barSize={10}
                   radius={[5, 5, 0, 0]}
                 />
                 <Bar
                   dataKey="present"
-                  fill="#33FF57"
+                  fill="#6CAC6F"
                   barSize={10}
                   radius={[5, 5, 0, 0]}
                 />
                 <Bar
                   dataKey="finish"
-                  fill="#3357FF"
+                  fill="#BEC461"
                   barSize={10}
                   radius={[5, 5, 0, 0]}
                 />
@@ -227,10 +309,6 @@ const CardVisitorSummaryTennant = () => {
             <hr />
             <div className="flex justify-between items-center mt-6 text-sm px-7 mb-4">
               <p>Total Hari: {chartData.length || 0}</p>
-              <p>
-                Kunjungan Terbanyak:
-                <span className="font-bold ml-2">{0}</span>
-              </p>
             </div>
           </div>
         </>
