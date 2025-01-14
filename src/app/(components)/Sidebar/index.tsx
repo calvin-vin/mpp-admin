@@ -105,17 +105,20 @@ const Sidebar = () => {
     <div className={sidebarClassNames}>
       {/* TOP LOGO */}
       <div
-        className={`flex gap-3 justify-between md:justify-normal items-center pt-8 ${
+        className={`flex gap-3 justify-between md:justify-center items-center pt-8 ${
           isSidebarCollapsed ? "px-2" : "px-8"
         }`}
       >
         <Link href={"/dashboard"}>
           <Image
-            src={"/assets/logo/MPP.png"}
+            src={
+              isSidebarCollapsed
+                ? "/assets/logo/MPP_collapsed.png"
+                : "/assets/logo/MPP.png"
+            }
             alt={"MPP Logo"}
-            width={120}
-            height={120}
-            className="mr-4"
+            width={160}
+            height={160}
           />
         </Link>
 

@@ -173,8 +173,8 @@ const CardVisitorSummaryTennant = () => {
   return (
     <div className="flex flex-col justify-between row-span-2 xl:row-span-3 col-span-1 md:col-span-2 xl:col-span-1 bg-white shadow-md rounded-2xl">
       {/* Filter Dropdown */}
-      <div className="px-7 pt-5 flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Kunjungan Tenant</h2>
+      <div className="px-7 pt-5 flex flex-col md:flex-row justify-between items-center">
+        <h2 className="text-lg font-semibold mb-4 md:mb-0">Kunjungan Tenant</h2>
         <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2">
           {/* Dropdown Filter for Agency */}
           {user?.nama_role != "OPERATOR" && (

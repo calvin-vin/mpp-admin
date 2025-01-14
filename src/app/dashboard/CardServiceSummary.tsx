@@ -1,10 +1,7 @@
 import {
   processAgencyQueueData,
-  processVisitorSummaryData,
   transformAgencyQueueToChartData,
-  transformVisitorSummaryToChartData,
   useGetAgencyQueueCountQuery,
-  useGetVisitorSummaryQuery,
 } from "@/state/dashboardSlice";
 import {
   endOfMonth,
@@ -13,7 +10,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import { RefreshCcw } from "lucide-react"; // Pastikan Anda menginstal lucide-react
+import { RefreshCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Bar,
@@ -211,7 +208,7 @@ const CardServiceSummary = () => {
             <ResponsiveContainer width="100%" height={350}>
               <BarChart
                 data={chartData}
-                margin={{ top: 0, right: 0, left: -25, bottom: 40 }}
+                margin={{ top: 0, right: 0, left: -25, bottom: 120 }}
                 className="relative z-10"
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -241,8 +238,7 @@ const CardServiceSummary = () => {
               <p>
                 Kunjungan Terbanyak:
                 <span className="font-bold ml-2">
-                  {`${processedData.maxAgencyVisitor.total} (${processedData.maxAgencyVisitor.date})` ||
-                    0}
+                  {`${processedData.maxAgencyVisitor.total}` || 0}
                 </span>
               </p>
             </div>

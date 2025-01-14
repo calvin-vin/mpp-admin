@@ -16,7 +16,7 @@ const ModalDelete = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-lg shadow-2xl p-6 w-1/3 max-w-[90%] relative">
+      <div className="bg-white rounded-lg shadow-2xl p-6 w-2/3 md:w-1/3 lg:w-1/4 max-w-[90%] relative">
         {/* Close Button */}
         <button
           onClick={handleClose}
