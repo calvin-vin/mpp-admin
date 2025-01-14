@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
-  useGetVisitorSummaryQuery,
-  transformVisitorSummaryToChartData,
-  processVisitorSummaryData,
-} from "@/state/dashboardSlice";
+  useGetVisitorSummaryTennantQuery,
+  transformVisitorSummaryTennantToChartData,
+  // Anda bisa menambahkan fungsi pemrosesan data jika diperlukan
+} from "@/state/dashboardSlice"; // Pastikan untuk mengimpor dari slice yang benar
 import {
   Bar,
   BarChart,
@@ -20,15 +20,13 @@ import {
   startOfWeek,
   endOfWeek,
 } from "date-fns";
-import useServices from "@/hooks/useServices";
-import useAgencies from "@/hooks/useAgencies";
 import { RefreshCcw } from "lucide-react";
 import { useAppSelector } from "../redux";
 
 // Tipe untuk filter
 type DateRangeFilter = "thisWeek" | "thisMonth" | "custom";
 
-const CardVisitorSummary = () => {
+const CardVisitorSummaryTennant = () => {
   const user = useAppSelector((state) => state.auth.user);
 
   // State untuk filter
@@ -45,17 +43,9 @@ const CardVisitorSummary = () => {
   const [queryParams, setQueryParams] = useState<{
     startDate?: string;
     endDate?: string;
-    agency?: string;
-    service?: string;
   }>({
     startDate: format(startOfMonth(new Date()), "yyyy-MM-dd"),
     endDate: format(endOfMonth(new Date()), "yyyy-MM-dd"),
-  });
-
-  // State untuk filters
-  const [filters, setFilters] = useState({
-    agency: "",
-    service: "",
   });
 
   // Effect untuk memperbarui query params saat filter berubah
@@ -89,25 +79,20 @@ const CardVisitorSummary = () => {
 
     // Validasi rentang tanggal
     if (newParams?.startDate && newParams?.endDate) {
-      setQueryParams({
-        ...newParams,
-        agency:
-          user?.nama_role == "OPERATOR" ? user?.id_instansi : filters.agency,
-        service: filters.service,
-      });
+      setQueryParams(newParams);
     }
-  }, [dateRangeFilter, customStartDate, customEndDate, filters]);
+  }, [dateRangeFilter, customStartDate, customEndDate]);
 
   // Query dengan rentang tanggal dinamis
-  const { data, isLoading, isError } = useGetVisitorSummaryQuery(queryParams, {
-    skip: !queryParams.startDate || !queryParams.endDate,
-  });
+  const { data, isLoading, isError } = useGetVisitorSummaryTennantQuery(
+    queryParams,
+    {
+      skip: !queryParams.startDate || !queryParams.endDate,
+    }
+  );
 
   // Transform data untuk chart
-  const chartData = data ? transformVisitorSummaryToChartData(data) : [];
-
-  // Proses data
-  const processedData = data ? processVisitorSummaryData(chartData) : null;
+  const chartData = data ? transformVisitorSummaryTennantToChartData(data) : [];
 
   // Handler untuk validasi dan update tanggal custom
   const handleCustomDateChange = (type: "start" | "end", value: string) => {
@@ -124,92 +109,19 @@ const CardVisitorSummary = () => {
     }
   };
 
-  // Handler untuk perubahan filter
-  const handleFilterChange = (
-    filterType: "agency" | "service",
-    value: string
-  ) => {
-    setFilters((prev) => ({
-      ...prev,
-      [filterType]: value,
-    }));
-  };
-
   // Fungsi untuk mereset filter
   const resetFilters = () => {
-    setFilters({ agency: "", service: "" });
     setDateRangeFilter("thisMonth");
     setCustomStartDate(format(startOfMonth(new Date()), "yyyy-MM-dd"));
     setCustomEndDate(format(endOfMonth(new Date()), "yyyy-MM-dd"));
   };
 
-  const {
-    agencyList,
-    isLoading: isLoadingAgency,
-    error: errorAgency,
-  } = useAgencies();
-
-  const {
-    serviceList,
-    isLoading: isLoadingService,
-    error: errorService,
-  } = useServices(
-    user?.nama_role == "OPERATOR" ? user?.id_instansi : filters.agency
-  );
-
-  const serviceMenuItems = useMemo(
-    () =>
-      serviceList.map((opt) => (
-        <option key={opt.value} value={opt.value.toString()}>
-          {opt.label}
-        </option>
-      )),
-    [serviceList]
-  );
-
-  const agencyMenuItems = useMemo(
-    () =>
-      agencyList.map((opt) => (
-        <option key={opt.value} value={opt.value.toString()}>
-          {opt.label}
-        </option>
-      )),
-    [agencyList]
-  );
   return (
     <div className="flex flex-col justify-between row-span-2 xl:row-span-3 col-span-1 md:col-span-2 xl:col-span-1 bg-white shadow-md rounded-2xl">
       {/* Filter Dropdown */}
       <div className="px-7 pt-5 flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Total Kunjungan</h2>
+        <h2 className="text-lg font-semibold">Total Kunjungan Tenant</h2>
         <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2">
-          {/* Filter Instansi */}
-          {user?.nama_role != "OPERATOR" && (
-            <div className="select-container">
-              <select
-                id="agency-select"
-                className="px-2 py-1 border rounded"
-                value={filters.agency}
-                onChange={(e) => handleFilterChange("agency", e.target.value)}
-              >
-                <option value="">Pilih Instansi</option>
-                {agencyMenuItems}
-              </select>
-            </div>
-          )}
-
-          {/* Filter Layanan */}
-          <div className="select-container">
-            <select
-              id="service-select"
-              className="px-2 py-1 border rounded"
-              value={filters.service}
-              onChange={(e) => handleFilterChange("service", e.target.value)}
-            >
-              <option value="">Pilih Layanan</option>
-              {serviceMenuItems}
-            </select>
-          </div>
-
           {/* Dropdown Filter */}
           <select
             value={dateRangeFilter}
@@ -269,9 +181,7 @@ const CardVisitorSummary = () => {
             <div className="flex justify-between items-center mb-6 px-7 mt-5">
               <div className="text-lg font-medium">
                 <p className="text-xs text-gray-400">Jumlah Kunjungan</p>
-                <span className="text-2xl font-extrabold">
-                  {processedData?.totalVisitors || 0}
-                </span>
+                <span className="text-2xl font-extrabold">{0}</span>
               </div>
             </div>
 
@@ -291,8 +201,20 @@ const CardVisitorSummary = () => {
                 <YAxis />
                 <Tooltip />
                 <Bar
-                  dataKey="total"
-                  fill="#16927E"
+                  dataKey="booked"
+                  fill="#FF5733"
+                  barSize={10}
+                  radius={[5, 5, 0, 0]}
+                />
+                <Bar
+                  dataKey="present"
+                  fill="#33FF57"
+                  barSize={10}
+                  radius={[5, 5, 0, 0]}
+                />
+                <Bar
+                  dataKey="finish"
+                  fill="#3357FF"
                   barSize={10}
                   radius={[5, 5, 0, 0]}
                 />
@@ -307,9 +229,7 @@ const CardVisitorSummary = () => {
               <p>Total Hari: {chartData.length || 0}</p>
               <p>
                 Kunjungan Terbanyak:
-                <span className="font-bold ml-2">
-                  {processedData?.maxVisitorDay?.total || 0}
-                </span>
+                <span className="font-bold ml-2">{0}</span>
               </p>
             </div>
           </div>
@@ -319,4 +239,4 @@ const CardVisitorSummary = () => {
   );
 };
 
-export default CardVisitorSummary;
+export default CardVisitorSummaryTennant;

@@ -23,7 +23,7 @@ const Datatable: React.FC<DatatableProps> = ({
       style={{
         display: "flex",
         width: "100%",
-        height: "500px",
+        height: "800px",
       }}
     >
       <DataGrid

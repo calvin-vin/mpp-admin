@@ -9,8 +9,12 @@ import CardSatisfaction from "./CardSatisfaction";
 import CardServiceSummary from "./CardServiceSummary";
 import CardTotalService from "./CardTotalService";
 import CardVisitorSummary from "./CardVisitorSummary";
+import { useAppSelector } from "../redux";
+import CardVisitorSummaryTennant from "./CardVisitorSummaryTenant";
 
 const Dashboard = () => {
+  const user = useAppSelector((state) => state.auth.user);
+
   const {
     data: dashboardData,
     isLoading: isLoadingTotalCount,
@@ -41,32 +45,44 @@ const Dashboard = () => {
   return (
     <AuthorizationWrapper>
       <div className="grid grid-cols-1 gap-10 pb-4 custom-grid-rows">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <CardTotalService
-            logo={<Building2 className="text-white text-5xl mb-4" />}
-            title={"Total Instansi"}
-            subTitle={"Jumlah Instansi pada MPP Pangkalpinang"}
-            total={total_agencies}
-          />
+        {user?.nama_role != "OPERATOR" && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <CardTotalService
+              logo={<Building2 className="text-white text-5xl mb-4" />}
+              title={"Total Instansi"}
+              subTitle={"Jumlah Instansi pada MPP Pangkalpinang"}
+              total={total_agencies}
+            />
 
-          <CardTotalService
-            logo={<LayoutList className="text-white text-5xl mb-4" />}
-            title={"Total Layanan"}
-            subTitle={"Jumlah layanan yang tersedia"}
-            total={total_services}
-          />
+            <CardTotalService
+              logo={<LayoutList className="text-white text-5xl mb-4" />}
+              title={"Total Layanan"}
+              subTitle={"Jumlah layanan yang tersedia"}
+              total={total_services}
+            />
 
-          <CardTotalService
-            logo={<Newspaper className="text-white text-5xl mb-4" />}
-            title={"Total Antrian"}
-            subTitle={"Jumlah antrian yang telah ditangani"}
-            total={total_queues}
-          />
-        </div>
+            <CardTotalService
+              logo={<Newspaper className="text-white text-5xl mb-4" />}
+              title={"Total Antrian"}
+              subTitle={"Jumlah antrian yang telah ditangani"}
+              total={total_queues}
+            />
+          </div>
+        )}
 
         <CardVisitorSummary />
-        <CardSatisfaction />
-        <CardServiceSummary />
+
+        {user?.nama_role === "OPERATOR" && (
+          <>
+            <CardVisitorSummaryTennant />
+          </>
+        )}
+
+        {user?.nama_role != "OPERATOR" && (
+          <>
+            <CardSatisfaction /> <CardServiceSummary />
+          </>
+        )}
       </div>
     </AuthorizationWrapper>
   );

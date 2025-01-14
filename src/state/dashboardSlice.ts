@@ -1,11 +1,5 @@
 import { apiSlice } from "./apiSlice";
 
-// Definisi tipe untuk parameter query
-interface VisitorSummaryParams {
-  startDate?: string;
-  endDate?: string;
-}
-
 // Definisi tipe untuk respons
 interface VisitorSummaryResponse {
   status: string;
@@ -18,11 +12,6 @@ interface VisitorSummaryResponse {
 // Tipe untuk data yang akan digunakan di chart
 interface ChartData {
   date: string;
-  total: number;
-}
-
-interface AgencyQueueCountItem {
-  name: string;
   total: number;
 }
 
@@ -41,8 +30,29 @@ interface AgencyQueueCountDataResponse {
   status: string;
   data: {
     visitorCounts: number[];
-    dataLabels: string[];
+    dateLabels: string[];
   };
+}
+
+// Definisi tipe untuk respons
+interface VisitorSummaryTennantResponse {
+  status: string;
+  data: {
+    series: {
+      BOOKED: number;
+      PRESENT: number;
+      FINISH: number;
+    }[];
+    dateLabels: string[];
+  };
+}
+
+// Tipe untuk data yang akan digunakan di chart
+interface TennantChartData {
+  date: string;
+  booked: number;
+  present: number;
+  finish: number;
 }
 
 // Di dashboardSlice.ts
@@ -108,6 +118,29 @@ export const dashboardSlice = apiSlice.injectEndpoints({
       providesTags: (result, error, arg) =>
         result ? ["DashboardMetrics"] : [],
     }),
+
+    getVisitorSummaryTennant: build.query<
+      VisitorSummaryTennantResponse,
+      | {
+          startDate?: string;
+          endDate?: string;
+        }
+      | undefined
+    >({
+      query: (params) => {
+        const queryParams = params || {};
+        return {
+          url: "/dashboard/antrian-status/list",
+          method: "GET",
+          params: {
+            start_date: queryParams.startDate,
+            end_date: queryParams.endDate,
+          },
+        };
+      },
+      providesTags: (result, error, arg) =>
+        result ? ["DashboardMetrics"] : [],
+    }),
   }),
 });
 // Utility function untuk mengolah data chart
@@ -141,7 +174,7 @@ export const processVisitorSummaryData = (data: ChartData[]) => {
 export const transformAgencyQueueToChartData = (
   response: AgencyQueueCountDataResponse
 ): ChartData[] => {
-  return response.data.dataLabels.map((date, index) => ({
+  return response.data.dateLabels.map((date, index) => ({
     date,
     total: response.data.visitorCounts[index],
   }));
@@ -164,10 +197,23 @@ export const processAgencyQueueData = (data: ChartData[]) => {
   };
 };
 
+// Utility function untuk mengolah data chart
+export const transformVisitorSummaryTennantToChartData = (
+  response: VisitorSummaryTennantResponse
+): TennantChartData[] => {
+  return response.data.dateLabels.map((date, index) => ({
+    date,
+    booked: response.data.series[index].BOOKED,
+    present: response.data.series[index].PRESENT,
+    finish: response.data.series[index].FINISH,
+  }));
+};
+
 // Hooks yang di-generate otomatis
 export const {
   useGetVisitorSummaryQuery,
   useLazyGetVisitorSummaryQuery,
   useGetAgencyQueueCountQuery,
   useGetDashboardSummaryQuery,
+  useGetVisitorSummaryTennantQuery,
 } = dashboardSlice;

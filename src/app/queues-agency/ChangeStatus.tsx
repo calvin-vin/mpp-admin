@@ -8,16 +8,15 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import Popover from "../(components)/Popover";
 import {
-  useUpdateQueueAgencyStatusToFinishMutation,
-  useUpdateQueueAgencyStatusToPresentMutation,
-} from "@/state/queueAgencySlice";
+  useUpdateQueueStatusToFinishMutation,
+  useUpdateQueueStatusToPresentMutation,
+} from "@/state/queueSlice";
 
 const ChangeStatus = ({ params }) => {
   const [status, setStatus] = useState(params.row.status?.toUpperCase());
-  const [updateQueueStatusToPresent] =
-    useUpdateQueueAgencyStatusToPresentMutation();
-  const [updateQueueStatusToFinish] =
-    useUpdateQueueAgencyStatusToFinishMutation();
+  const [isDisabled, setIsDisabled] = useState(false); // State untuk mengontrol disabled
+  const [updateQueueStatusToPresent] = useUpdateQueueStatusToPresentMutation();
+  const [updateQueueStatusToFinish] = useUpdateQueueStatusToFinishMutation();
 
   const statusConfig = {
     BOOKED: {
@@ -38,6 +37,8 @@ const ChangeStatus = ({ params }) => {
   };
 
   const handleStatusChange = async (newStatus: string) => {
+    if (isDisabled) return; // Jika disabled, tidak lakukan apa-apa
+
     try {
       if (params.row.status === "FINISH" || newStatus === "BOOKED") {
         toast.error(
@@ -45,9 +46,10 @@ const ChangeStatus = ({ params }) => {
         );
         return false;
       } else {
+        setIsDisabled(true);
         switch (newStatus) {
           case "PRESENT":
-            const res = await updateQueueStatusToPresent({
+            await updateQueueStatusToPresent({
               id_antrian: params.row.id,
             }).unwrap();
             break;
@@ -66,6 +68,7 @@ const ChangeStatus = ({ params }) => {
     } catch (error) {
       toast.error("Gagal memperbarui status");
       console.error(error);
+      setIsDisabled(false);
     }
   };
 
@@ -91,6 +94,7 @@ const ChangeStatus = ({ params }) => {
               cursor-pointer 
               hover:bg-gray-100 
               ${status === key ? "bg-gray-200" : ""}
+              ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}
             `}
         >
           {config.icon}
@@ -114,6 +118,7 @@ const ChangeStatus = ({ params }) => {
             gap-2 
             cursor-pointer 
             hover:opacity-80
+            ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}
           `}
       >
         {currentStatus.icon}

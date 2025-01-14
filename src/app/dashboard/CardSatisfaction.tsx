@@ -42,7 +42,7 @@ const CardSatisfaction: React.FC = () => {
         if (response.data.status) {
           const data = response.data.data.map((item: any) => ({
             name: item.category,
-            value: Math.round(item.average_answer * 20), // Mengonversi nilai rata-rata ke persentase (0-5 menjadi 0-100)
+            value: Math.round(item.average_answer * 25),
           }));
 
           setParameters(data);
@@ -77,18 +77,27 @@ const CardSatisfaction: React.FC = () => {
     return <LoadingSpinner />;
   }
 
+  const predicateClass =
+    averageIKM < 65
+      ? "text-red-500 bg-red-100" // Danger
+      : averageIKM <= 76.6
+      ? "text-yellow-500 bg-yellow-100" // Warning
+      : averageIKM <= 88.3
+      ? "text-blue-500 bg-blue-100" // Info
+      : "text-green-500 bg-green-100"; // Success
+
   return (
     <div className="flex flex-col items-center md:flex-row justify-between row-span-2 xl:row-span-3 col-span-1 md:col-span-2 xl:col-span-1 bg-white shadow-md rounded-2xl ">
       {/* Kolom Kiri: Nilai IKM */}
       <div className="md:w-1/3 w-full p-4 flex flex-col items-center border-b md:border-b-0 md:border-r border-gray-300">
         <h3 className="text-lg font-semibold text-gray-800 mb-2">
           Indeks Kepuasan Masyarakat
-        </h3>{" "}
-        {/* Teks IKM */}
-        <ChartLine className="text-primary text-5xl mb-4" />
-        <h2 className="text-4xl font-bold">{averageIKM.toFixed(1)}</h2>{" "}
-        {/* Tampilkan rata-rata IKM */}
-        <p className="text-gray-700 text-center mt-2">{predicate}</p>
+        </h3>
+        <ChartLine className="text-primary mb-4" />
+        <h2 className="text-8xl font-bold">{averageIKM.toFixed(1)}</h2>
+        <p className={`text-xl text-center mt-2 ${predicateClass} p-2 rounded`}>
+          {predicate}
+        </p>
       </div>
 
       {/* Kolom Kanan: Progress Bar untuk 8 Parameter */}

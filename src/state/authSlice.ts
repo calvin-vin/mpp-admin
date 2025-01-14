@@ -85,10 +85,6 @@ export const authSlice = createSlice({
       localStorage.setItem("user", JSON.stringify(user));
     },
     logout: (state) => {
-      state.user = null;
-      state.token = null;
-
-      // Hapus dari localStorage
       localStorage.removeItem("token");
       localStorage.removeItem("x-key");
       localStorage.removeItem("user");

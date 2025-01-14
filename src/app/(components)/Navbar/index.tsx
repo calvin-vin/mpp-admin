@@ -2,7 +2,7 @@
 
 import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { setIsDarkMode, setIsSidebarCollapsed } from "@/state";
-import { logout } from "@/state/authSlice"; // Import logout action
+import { logout } from "@/state/authSlice";
 import { HOST_PORTAL } from "@/utils/constants";
 import { LogOut, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
