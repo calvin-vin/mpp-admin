@@ -15,15 +15,13 @@ import toast from "react-hot-toast";
 import * as z from "zod";
 
 const formSchema = z.object({
-  nama_aplikasi: z
-    .string()
-    .min(2, { message: "Nama aplikasi minimal 2 karakter" }),
-  instagram: z.string().min(2, { message: "Instagram minimal 2 karakter" }),
-  youtube: z.string().min(2, { message: "Youtube minimal 2 karakter" }),
-  facebook: z.string().min(2, { message: "Facebook minimal 2 karakter" }),
-  whatsapp: z.string().min(2, { message: "Whatsapp minimal 2 karakter" }),
-  footer: z.string().min(2, { message: "Footer minimal 2 karakter" }),
-  versi: z.string().min(2, { message: "Versi minimal 2 karakter" }),
+  nama_aplikasi: z.string().min(1, { message: "Nama aplikasi harus diisi" }),
+  instagram: z.string().min(1, { message: "Instagram harus diisi" }),
+  youtube: z.string().min(1, { message: "Youtube harus diisi" }),
+  facebook: z.string().min(1, { message: "Facebook harus diisi" }),
+  whatsapp: z.string().min(1, { message: "Whatsapp harus diisi" }),
+  footer: z.string().min(1, { message: "Footer harus diisi" }),
+  versi: z.string().min(1, { message: "Versi harus diisi" }),
   logo: createImageValidation({ required: false }),
 });
 

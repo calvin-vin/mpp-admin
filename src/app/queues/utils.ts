@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 export const formSchema = z.object({
-  nama_lengkap: z.string().min(2, { message: "Nama minimal 2 karakter" }),
+  nama_lengkap: z.string().min(1, { message: "Nama minimal harus diisi" }),
   usia: z.coerce
     .number({ message: "Harus merupakan angka" })
     .min(1, { message: "Umur harus diisi" })

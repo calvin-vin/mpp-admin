@@ -2,11 +2,9 @@ import * as z from "zod";
 import { createImageValidation } from "@/utils/helpers";
 
 export const formSchema = z.object({
-  instansi: z.string().min(2, { message: "Nama instansi minimal 2 karakter" }),
-  nickname: z
-    .string()
-    .min(2, { message: "Akronim instansi minimal 2 karakter" }),
-  kode: z.string().min(2, { message: "Kode instansi minimal 2 karakter" }),
+  instansi: z.string().min(1, { message: "Nama instansi harus diisi" }),
+  nickname: z.string().min(1, { message: "Akronim instansi harus diisi" }),
+  kode: z.string().min(1, { message: "Kode instansi harus diisi" }),
   no_tenant: z.preprocess(
     (val) => String(val),
     z.string().min(1, { message: "Nomor tenant harus diisi" })

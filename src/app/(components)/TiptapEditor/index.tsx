@@ -1,9 +1,7 @@
-"use client";
-
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Bold, Italic, List, ListOrdered } from "lucide-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 
 interface TiptapEditorProps {
   value: string;
@@ -32,28 +30,31 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({ value, onChange }) => {
     ],
     content: value,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      if (html !== value) {
+        onChange(html);
+      }
     },
     immediatelyRender: false,
   });
 
-  // Update konten jika value berubah
   useEffect(() => {
     if (editor && value) {
-      editor.commands.setContent(value);
+      // Hanya set konten jika berbeda
+      if (editor.getHTML() !== value) {
+        editor.commands.setContent(value);
+      }
     }
   }, [value, editor]);
 
-  // Fungsi untuk menangani fokus dan mencegah kehilangan fokus
-  const handleFocus = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleFocus = () => {
     editor?.chain().focus().run();
   };
 
   if (!editor) return null;
 
   return (
-    <div className="border rounded-md" onClick={handleFocus}>
+    <div className="border rounded-md">
       {/* Advanced Toolbar */}
       <div className="flex border-b p-2 space-x-2 bg-gray-50">
         <button
@@ -105,6 +106,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({ value, onChange }) => {
       <EditorContent
         editor={editor}
         className="p-2 min-h-[150px] focus:outline-none focus:border-none focus:ring-0"
+        onFocus={handleFocus}
       />
     </div>
   );

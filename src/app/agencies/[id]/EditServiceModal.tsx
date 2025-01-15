@@ -14,7 +14,7 @@ import toast from "react-hot-toast";
 import * as z from "zod";
 
 const editServiceSchema = z.object({
-  layanan: z.string().min(2, { message: "Nama layanan minimal 2 karakter" }),
+  layanan: z.string().min(1, { message: "Nama layanan harus diisi" }),
   deskripsi: z.string().optional(),
 });
 

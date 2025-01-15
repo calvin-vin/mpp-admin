@@ -148,9 +148,7 @@ const EditAgency = () => {
 
           {/* Kode Instansi */}
           <div>
-            <label className="block mb-2 font-medium">
-              Kode Instansi <span className="text-red-500">*</span>
-            </label>
+            <label className="block mb-2 font-medium">Kode Instansi</label>
             <input
               type="text"
               {...register("kode")}
