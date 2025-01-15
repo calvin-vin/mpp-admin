@@ -29,7 +29,7 @@ const CardSatisfaction: React.FC = () => {
   const [parameters, setParameters] = useState<
     { name: string; value: number }[]
   >([]);
-  const [averageIKM, setAverageIKM] = useState(0); // State untuk menyimpan rata-rata IKM
+  const [averageIKM, setAverageIKM] = useState(0);
   const [predicate, setPredicate] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -94,7 +94,7 @@ const CardSatisfaction: React.FC = () => {
           Indeks Kepuasan Masyarakat
         </h3>
         <ChartLine className="text-primary mb-4" />
-        <h2 className="text-8xl font-bold">{averageIKM.toFixed(1)}</h2>
+        <h2 className="text-8xl font-bold">{averageIKM.toFixed(2)}</h2>
         <p className={`text-xl text-center mt-2 ${predicateClass} p-2 rounded`}>
           {predicate}
         </p>
@@ -109,7 +109,7 @@ const CardSatisfaction: React.FC = () => {
                 {param.name}
               </span>
               <span className="text-md font-medium text-primary">
-                {param.value}%
+                {param.value}
               </span>
             </div>
             <ProgressBar value={param.value} />

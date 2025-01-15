@@ -32,7 +32,7 @@ const CustomXAxisTick = (props: any) => {
       x={x}
       y={y}
       textAnchor="end"
-      transform={`rotate(-45, ${x}, ${y})`}
+      transform={`rotate(-90, ${x}, ${y})`}
       fontSize={12}
       fill="#333"
     >
@@ -208,7 +208,7 @@ const CardServiceSummary = () => {
             <ResponsiveContainer width="100%" height={350}>
               <BarChart
                 data={chartData}
-                margin={{ top: 0, right: 0, left: -25, bottom: 120 }}
+                margin={{ top: 0, right: 0, left: -25, bottom: 60 }}
                 className="relative z-10"
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
