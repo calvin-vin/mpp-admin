@@ -15,6 +15,7 @@ export const formSchema = z.object({
     .string()
     .min(1, { message: "Jenis Permohonan harus dipilih" }),
   mobile: z.string().min(1, { message: "No HP harus diisi" }),
+  alamat: z.string().min(1, { message: "Alamat harus diisi" }),
   tanggal: z.date({ message: "Harus merupakan tanggal" }),
   jam: z.string().min(1, { message: "Jam harus diisi" }),
 });

@@ -87,6 +87,7 @@ const QueueDetail = () => {
         pekerjaan: queueData.pekerjaan,
         status_kawin: queueData.status_kawin,
         mobile: queueData.mobile,
+        alamat: queueData.alamat,
         id_layanan: queueData.id_layanan.toString(),
         jenis_permohonan: queueData.jenis_permohonan,
         tanggal: queueData.tanggal ? new Date(queueData.tanggal) : undefined,
@@ -394,6 +395,24 @@ const QueueDetail = () => {
                 {errors.status_kawin.message}
               </p>
             )}
+          </div>
+
+          {/* Alamat */}
+          <div>
+            <label htmlFor="alamat" className="block mb-2">
+              Alamat
+            </label>
+            <textarea
+              {...register("alamat")}
+              className="w-full p-2 border rounded"
+              placeholder="Masukkan alamat"
+            />
+            {errors.alamat && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.alamat.message}
+              </p>
+            )}
+            {RenderFieldError("alamat", errorsAPI)}
           </div>
 
           {/* Layanan */}
