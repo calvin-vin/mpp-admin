@@ -27,4 +27,4 @@ jobs:
       - name: Delete old container
         run: docker rm -f mpp-admin-container
       - name: Run Docker Container
-        run: docker run -d -p 4000:4000 --name mpp-admin-container watashiwazer0/nodejs-app
+        run: docker run -d -p 4000:4000 --name mpp-admin-container watashiwazer0/mpp-admin
