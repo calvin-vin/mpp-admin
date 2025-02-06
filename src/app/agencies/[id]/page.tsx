@@ -102,7 +102,7 @@ const AgencyPage = () => {
           <div className="flex items-center space-x-6">
             {agency?.data?.logo ? (
               <div className="relative">
-                <Image
+                <img
                   src={agency?.data?.logo}
                   alt={agency?.data?.instansi}
                   width={120}
@@ -180,7 +180,7 @@ const AgencyPage = () => {
               key={index}
               className="p-4 border rounded-lg shadow-md bg-white flex items-center"
             >
-              <Image
+              <img
                 src={stat.icon}
                 alt={stat.label}
                 width={50}

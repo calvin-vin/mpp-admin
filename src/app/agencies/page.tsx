@@ -133,13 +133,12 @@ const AgencyPage = () => {
             {/* Logo Agency */}
             {agency.logo ? (
               <div className="w-24 h-24 mb-6 flex items-center justify-center">
-                <Image
+                <img
                   src={agency.logo}
                   alt={`Logo ${agency.instansi}`}
                   width={96}
                   height={96}
                   className="object-contain"
-                  priority={false}
                 />
               </div>
             ) : (

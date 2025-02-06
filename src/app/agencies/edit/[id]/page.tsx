@@ -218,7 +218,7 @@ const EditAgency = () => {
             {/* Tampilkan logo lama jika ada */}
             {agencyData?.data?.logo && !logoFile && (
               <div className="mt-2">
-                <Image
+                <img
                   src={agencyData.data.logo}
                   alt="Logo Instansi"
                   width={200}

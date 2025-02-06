@@ -121,12 +121,10 @@ const FacilityPage = () => {
               {/* Image wrapper with fixed height */}
               <div className="w-full h-48 relative overflow-hidden">
                 {facility.foto ? (
-                  <Image
+                  <img
                     src={facility.foto}
                     alt={`Logo ${facility.nama_fasilitas}`}
-                    fill
                     className="object-cover w-full h-full"
-                    priority={false}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-100">
