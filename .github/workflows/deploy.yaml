@@ -1,4 +1,4 @@
-name: Deploy MPP Admin
+name: Deploy MPP Admin - NextJS App
 
 on:
   push:
