@@ -2,7 +2,7 @@ import toast from "react-hot-toast";
 import * as z from "zod";
 
 export const getHeaders = (): { "X-Key"?: string; Token?: string } => {
-  const dataString = localStorage.getItem("store");
+  const dataString = localStorage.getItem("user");
 
   if (!dataString) {
     return {}; // Kembalikan objek kosong jika tidak ada data

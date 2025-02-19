@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 import Datatable from "../(components)/Datatable";
 import ErrorDisplay from "../(components)/ErrorDisplay";
 import ChangeStatus from "./ChangeStatus";
+import DownloadExcel from "./DownloadExcel";
 import QueueFilter from "./QueueFilter";
 
 // Definisikan tipe DateRange dan FilterState seperti di QueueFilter
@@ -303,8 +304,8 @@ const Queue = () => {
           setSearchTerm={setSearchTerm}
         />
 
-        {/* BUTTON ADD */}
-        <div className="flex justify-end mb-4">
+        {/* BUTTON ADD & DOWNLOAD */}
+        <div className="flex justify-end mb-4 gap-2">
           <Link
             href={`/queues/add`}
             className={`flex items-center bg-primary text-white font-semibold py-2 px-4 rounded 
@@ -313,6 +314,8 @@ const Queue = () => {
             <PlusCircle className="w-5 h-5 mr-2" />
             Tambah Antrian
           </Link>
+
+          <DownloadExcel filters={filters} />
         </div>
 
         <Datatable

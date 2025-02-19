@@ -16,6 +16,7 @@ import ErrorDisplay from "../(components)/ErrorDisplay";
 import { useAppSelector } from "../redux";
 import ChangeStatus from "./ChangeStatus";
 import QueueFilter from "./QueueFilter";
+import DownloadExcel from "./DownloadExcel";
 
 // Definisikan tipe DateRange dan FilterState seperti di QueueFilter
 interface DateRange {
@@ -269,6 +270,11 @@ const Queue = () => {
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
         />
+
+        {/* BUTTON ADD & DOWNLOAD */}
+        <div className="flex justify-end mb-4">
+          <DownloadExcel filters={filters} />
+        </div>
 
         <Datatable
           totalCount={totalCount}

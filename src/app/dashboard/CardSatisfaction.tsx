@@ -37,7 +37,7 @@ const CardSatisfaction: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "https://skm.pangkalpinangkota.go.id/api/reports/058680c5-1a19-48bd-8386-4c748fe9ca85"
+          "https://skm.pangkalpinangkota.go.id/api/reports/event/0dade69f-7260-4a83-a96a-1b72a7e25169"
         );
         if (response.data.status) {
           const data = response.data.data.map((item: any) => ({

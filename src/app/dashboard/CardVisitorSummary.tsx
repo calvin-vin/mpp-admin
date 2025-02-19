@@ -143,17 +143,9 @@ const CardVisitorSummary = () => {
     setCustomEndDate(format(endOfMonth(new Date()), "yyyy-MM-dd"));
   };
 
-  const {
-    agencyList,
-    isLoading: isLoadingAgency,
-    error: errorAgency,
-  } = useAgencies();
+  const { agencyList } = useAgencies();
 
-  const {
-    serviceList,
-    isLoading: isLoadingService,
-    error: errorService,
-  } = useServices(
+  const { serviceList } = useServices(
     user?.nama_role == "OPERATOR" ? user?.id_instansi : filters.agency
   );
 
