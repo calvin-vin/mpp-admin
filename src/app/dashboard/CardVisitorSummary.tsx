@@ -143,12 +143,9 @@ const CardVisitorSummary = () => {
     setCustomEndDate(format(endOfMonth(new Date()), "yyyy-MM-dd"));
   };
 
-  const { agencyList } = useAgencies();
-
   const { serviceList } = useServices(
     user?.nama_role == "OPERATOR" ? user?.id_instansi : filters.agency
   );
-
   const serviceMenuItems = useMemo(
     () =>
       serviceList.map((opt) => (
@@ -159,6 +156,7 @@ const CardVisitorSummary = () => {
     [serviceList]
   );
 
+  const { agencyList } = useAgencies();
   const agencyMenuItems = useMemo(
     () =>
       agencyList.map((opt) => (

@@ -78,11 +78,9 @@ const Dashboard = () => {
           </>
         )}
 
-        {user?.nama_role != "OPERATOR" && (
-          <>
-            <CardSatisfaction /> <CardServiceSummary />
-          </>
-        )}
+        <CardSatisfaction />
+
+        {user?.nama_role != "OPERATOR" && <CardServiceSummary />}
       </div>
     </AuthorizationWrapper>
   );
