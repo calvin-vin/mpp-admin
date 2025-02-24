@@ -84,7 +84,6 @@ const CardSatisfaction: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log(user?.id_instansi);
     if (user?.id_instansi) {
       fetchData(user?.id_instansi);
     } else {

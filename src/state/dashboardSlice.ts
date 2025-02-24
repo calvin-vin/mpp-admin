@@ -146,13 +146,14 @@ export const dashboardSlice = apiSlice.injectEndpoints({
     }),
   }),
 });
+
 // Utility function untuk mengolah data chart
 export const transformVisitorSummaryToChartData = (
   response: VisitorSummaryResponse
 ): ChartData[] => {
   return response.data.dateLabels.map((date, index) => ({
     date,
-    total: response.data.visitorCounts[index],
+    total: Number(response.data.visitorCounts[index]),
   }));
 };
 

@@ -103,6 +103,8 @@ const CardVisitorSummary = () => {
     skip: !queryParams.startDate || !queryParams.endDate,
   });
 
+  console.log(data);
+
   // Transform data untuk chart
   const chartData = data ? transformVisitorSummaryToChartData(data) : [];
 
